@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<equipos>
+    <equipo>
+        <nombre>Real Madrid CF</nombre>
+        <ciudad>Madrid</ciudad>
+        <entrenador></entrenador>
+        <jugadores>
+            <jugador posicion = "defensa">
+                <nombre>David Alaba</nombre>
+                <nacionalidad>Austriaco</nacionalidad>
+            </jugador>
+            
+            <jugador posicion = "medio">
+                <nombre>Jude Bellingham</nombre>
+                <nacionalidad>Inglés</nacionalidad>
+            </jugador>
+
+        </jugadores>
+    </equipo>
+
+    <equipo>
+        <nombre>Manchester City</nombre>
+        <ciudad>Manchester</ciudad>
+        <entrenador></entrenador>
+        <jugadores>
+            <jugador posicion = "defensa">
+                <nombre>Joao Cancelo</nombre>
+                <nacionalidad>Portugués</nacionalidad>
+            </jugador>
+
+            <jugador posicion = "medio">
+                <nombre>Kevin De Bruyne</nombre>
+                <nacionalidad>Belga</nacionalidad>
+            </jugador>
+        </jugadores>
+
+    </equipo>
+</marcadores>
