@@ -1,0 +1,24 @@
+<!--Se pide que se escriba un documento XML que almacene 
+la informacion de varias ciudades por el pais y continente 
+donde se encuentran-->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<ciudades>
+    <ciudad>
+        <nombre>Nueva Delhi</nombre>
+        <pais>India</pais>
+        <continente>Asia</continente>
+    </ciudad>
+
+    <ciudad>
+        <nombre>Lisboa</nombre>
+        <pais>Portugal</pais>
+        <continente>Europa</continente>
+    </ciudad>
+
+    <ciudad>
+        <nombre>El Cairo</nombre>
+        <pais>Egipto</pais>
+        <continente>África</continente>
+    </ciudad>
+</ciudades>
