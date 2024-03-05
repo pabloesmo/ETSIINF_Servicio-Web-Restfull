@@ -17,7 +17,7 @@ Diseño e implementación de una API REST y un prototipo funcional de un servici
 
 Entornos de desarollo:
 - VSCode: -
-- Eclipse + Apache Tomcat: Entorno de desarrollo integrado (IDE) que permite desarrollar y desplegar aplicaciones web Java utilizando el servidor web Tomcat.
+- Eclipse + Apache Tomcat: Entorno de desarrollo integrado para desarrollar y desplegar aplicaciones web Java utilizando el servidor web Tomcat.
 
 APIs:
 - Java JAX-RS: Especificación de Java que facilita la creación de servicios web RESTful utilizando el lenguaje de programación Java
