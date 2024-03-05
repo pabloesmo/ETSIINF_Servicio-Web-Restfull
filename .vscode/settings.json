@@ -1,0 +1,7 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "resources/jaxrs-ri/**/*.jar",
+        "resources/apache-tomcat-9.0.6/**/*.jar"
+    ]
+}
