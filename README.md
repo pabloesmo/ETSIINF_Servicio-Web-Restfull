@@ -120,7 +120,7 @@ Se debe implementar a través de la API:
     - contenedores/fábricas
     - controladores
         * Diseñe los tipos de documentos JSON necesarios para el servicio
-        * Diseñe los esquemas JSON\n
+        * Diseñe los esquemas JSON
 No necesario proporcionar los esquemas\n
 Sí los ejemplos de datos de todos los tipos de docs definidos
 
