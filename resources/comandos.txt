@@ -1,0 +1,15 @@
+PARA AÑADIR (con un "." se añade todo lo que se haya cambiado)
+ => git add .
+
+PARA EL COMMIT (COMENTARIO)
+ => git commit -m "<aqui el comentario a escribir>"
+
+PARA EL PUSHEO (con esto se sube al repo)
+ => git push
+
+PARA EL PULL (clasico)
+ => git pull
+
+PARA EL PULL (sin sobreescritura)
+ => git reset --hard origin
+ => git pull
