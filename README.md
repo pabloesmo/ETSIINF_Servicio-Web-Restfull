@@ -119,10 +119,10 @@ Se debe implementar a través de la API:
     - recursos compuestos
     - contenedores/fábricas
     - controladores
-    1.1. Diseñe los tipos de documentos JSON necesarios para el servicio
-    1.2. Diseñe los esquemas JSON
-        No necesario proporcionar los esquemas
-        Sí los ejemplos de datos de todos los tipos de docs definidos
+1.1. Diseñe los tipos de documentos JSON necesarios para el servicio
+1.2. Diseñe los esquemas JSON
+    No necesario proporcionar los esquemas
+    Sí los ejemplos de datos de todos los tipos de docs definidos
 
 2. Diseñe los ids URI (nedpoint) de todos los recursos en el modelo (segun las convenciones de clase)
 
