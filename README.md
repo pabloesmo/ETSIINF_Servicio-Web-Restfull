@@ -121,8 +121,8 @@ Se debe implementar a través de la API:
     - controladores
         * Diseñe los tipos de documentos JSON necesarios para el servicio
         * Diseñe los esquemas JSON
-    No necesario proporcionar los esquemas
-    Sí los ejemplos de datos de todos los tipos de docs definidos
+No necesario proporcionar los esquemas
+Sí los ejemplos de datos de todos los tipos de docs definidos
 
 2. Diseñe los ids URI (nedpoint) de todos los recursos en el modelo (segun las convenciones de clase)
 
