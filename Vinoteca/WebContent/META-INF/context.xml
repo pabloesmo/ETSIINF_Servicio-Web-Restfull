@@ -1,0 +1,11 @@
+<Context>
+	<Resource name="jdbc/GarajesyEmpleados"
+		auth="Container"
+		type="javax.sql.DataSource"
+		username="garajes"
+		password="garajes"
+		driverClassName="com.mysql.jdbc.Driver"
+		url="jdbc:mysql://localhost:3306/GarajesyEmpleados?useSSL=false"
+		maxActive="6"
+		maxIdle="3"/>
+</Context>
