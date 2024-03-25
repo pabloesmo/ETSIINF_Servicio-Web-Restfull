@@ -41,32 +41,39 @@ public class VinoRecurso {
         }
     }
 
-
+    /*Funcion para añadir vino */
     @POST
+    @Path("/{id_usuario}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-        public Response addVino(@FormParam("nombre") String nombre, @FormParam("bodega") String bodega, @FormParam("añada") int añada, @FormParam("denominacion") String denominacion, @FormParam("tipo") String tipo, @FormParam("tiposUva") String[] tiposUva) {
-        if(!ListaVinos.existeVino(nombre)){
-            Vino vino = new Vino(nombre, bodega, añada, denominacion, tipo, tiposUva);
-            ListaVinos.addVino(vino);
+        public Response addVino(@FormParam("id_usuario") int idUsuario,@FormParam("nombre") String nombre, @FormParam("bodega") String bodega, @FormParam("añada") int añada, @FormParam("denominacion") String denominacion, @FormParam("tipo") String tipo, @FormParam("tiposUva") String[] tiposUva, @FormParam("puntuacion") int puntuacion){
+        if(ListaUsuarios.getUsuario(idUsuario) == null){/*Compruebo si existe el usuario */
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        if(!ListaUsuarios.getUsuario(idUsuario).existeVino(nombre)){/*Compruebo si ya existe le vino */
+            Vino vino = new Vino(nombre, bodega, añada, denominacion, tipo, tiposUva,puntuacion);/*si no esxite lo creo  */
+            ListaUsuarios.getUsuario(idUsuario).addVino(vino);/*añado el vino a la lista de vinos de ese usuario */
             // Devolvemos una respuesta con código HTTP 201 Created
             return Response.status(Response.Status.CREATED).build();
         }else{
-            System.out.println("El usuario ya existe");
             // En este caso, podrías devolver un código de estado HTTP 409 Conflict para indicar que la operación no pudo completarse debido a un conflicto con el estado actual del recurso.
             return Response.status(Response.Status.CONFLICT).build();
         }
     }
 
-    @PUT
+    @PUT/*Funcion para modificar el vino de un usuario. */
+    @Path("/{id_usuario}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response updateVino(@FormParam("nombre") String nombre, @FormParam("bodega") String bodega, @FormParam("añada") int añada, @FormParam("denominacion") String denominacion, @FormParam("tipo") String tipo, @FormParam("tiposUva") String[] tiposUva) {
-        Vino vino = ListaVinos.getVino(nombre);
-        if(vino != null){
-            vino.setBodega(vino.getBodega());
-            vino.setAñada(vino.getAñada());
-            vino.setDenominacion(vino.getDenominacion());
-            vino.setTipo(vino.getTipo());
-            vino.setTiposUva(vino.getTiposUva());
+    public Response updateVino(@FormParam("id") int idUsuario,@FormParam("nombre") String nombre, @FormParam("bodega") String bodega, @FormParam("añada") int añada, @FormParam("denominacion") String denominacion, @FormParam("tipo") String tipo, @FormParam("tiposUva") String[] tiposUva) {
+        if(ListaUsuarios.getUsuario(idUsuario) == null){/*Compruebo si existe el usuario */
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        if(ListaUsuarios.getUsuario(idUsuario).existeVino(nombre)){
+            ListaUsuarios.getUsuario(idUsuario).getVino(nombre).setBodega(bodega);
+            ListaUsuarios.getUsuario(idUsuario).getVino(nombre).setAñada(añada);
+            ListaUsuarios.getUsuario(idUsuario).getVino(nombre).setDenominacion(denominacion);
+            ListaUsuarios.getUsuario(idUsuario).getVino(nombre).setTipo(tipo);
+            ListaUsuarios.getUsuario(idUsuario).getVino(nombre).setTiposUva(tiposUva);
+
             // Devolvemos una respuesta con código HTTP 200 OK
             return Response.status(Response.Status.OK).build();
         } else {
@@ -76,10 +83,14 @@ public class VinoRecurso {
     }
 
     @DELETE
+    @Path("/{id_usuario}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response deleteVino(@FormParam("nombre") String nombre) {
-        if(ListaVinos.existeVino(nombre)){
-            ListaVinos.deleteVino(nombre);
+    public Response deleteVino(@FormParam("id_usuario") int idUsuario,@FormParam("nombre") String nombre) {
+        if(ListaUsuarios.getUsuario(idUsuario) == null){/*Compruebo si existe el usuario */
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        if(ListaUsuarios.getUsuario(idUsuario).existeVino(nombre)){
+            ListaUsuarios.getUsuario(idUsuario).deleteVino(nombre);
             // Devolvemos una respuesta con código HTTP 200 OK
             return Response.status(Response.Status.OK).build();
         } else {
@@ -112,4 +123,6 @@ public class VinoRecurso {
 
         return html.toString();
     }
+
+    
 }

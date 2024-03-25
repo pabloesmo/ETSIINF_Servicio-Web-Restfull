@@ -5,6 +5,15 @@ public class ListaUsuarios {
     private static ArrayList<Usuario> usuarios = new ArrayList<Usuario>();
 
 
+    public static Usuario getUsuario(int id) {
+        for (int i=0; i < usuarios.size(); i++) {
+            if (usuarios.get(i).getId() == id) {
+                return usuarios.get(i);
+            }
+        }
+        return null;
+    }
+
     public static Usuario getUsuario(String nombre) {
         for (int i=0; i < usuarios.size(); i++) {
             if (usuarios.get(i).getNombre().equals(nombre)) {
@@ -17,6 +26,15 @@ public class ListaUsuarios {
     public static boolean existeUsuario(String nombre){
         for (int i=0; i < usuarios.size(); i++) {
             if (usuarios.get(i).getNombre().equals(nombre)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean existeUsuario(int id){
+        for (int i=0; i < usuarios.size(); i++) {
+            if (usuarios.get(i).getId()== id) {
                 return true;
             }
         }
@@ -57,4 +75,6 @@ public class ListaUsuarios {
         }
         return res;
     }
+
+   
 }

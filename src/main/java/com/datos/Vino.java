@@ -8,14 +8,16 @@ public class Vino {
 	private String denominacion;
 	private String tipo;
 	private String[] tiposUva;
+	private int puntuacion;
 	
-	public Vino(String nombre, String bodega, int añada, String denominacion, String tipo, String[] tiposUva) {
+	public Vino(String nombre, String bodega, int añada, String denominacion, String tipo, String[] tiposUva,int puntuacion) {
 		this.nombre = nombre;
 		this.bodega = bodega;
 		this.añada = añada;
 		this.denominacion = denominacion;
 		this.tipo = tipo;
 		this.tiposUva = tiposUva;
+		this.puntuacion = puntuacion;
 	}
 
 	public int getId() {
