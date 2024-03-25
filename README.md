@@ -179,3 +179,8 @@ No es necesario realizar un cliente con interfaz gráfico o web (Vamos, no es ne
 - Implementación servicio y cliente: 40%
     - Servicio: 75%
     - Cliente: 25%
+
+
+#### COMANDOS PARA EJECUTAR CON EL DOCKER
+ - Para generar la imagen => "docker build -t sos ."
+ - Para ejecutarlo y lanzar el servidor => "docker run -p 80:8080 sos"
