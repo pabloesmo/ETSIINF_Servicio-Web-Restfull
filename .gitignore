@@ -1,1 +1,4 @@
-/bin/
+# Configuracion personal 
+.vscode/
+# Archivos compilados .class
+target/

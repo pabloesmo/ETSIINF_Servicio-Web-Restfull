@@ -1,8 +1,5 @@
 package com.datos;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlAttribute;
 
-@XmlRootElement(name = "vino")
 public class Vino {
 	private int id;
 	private String nombre;
@@ -12,11 +9,15 @@ public class Vino {
 	private String tipo;
 	private String[] tiposUva;
 	
-	public Vino(String nombre) {
+	public Vino(String nombre, String bodega, int añada, String denominacion, String tipo, String[] tiposUva) {
 		this.nombre = nombre;
+		this.bodega = bodega;
+		this.añada = añada;
+		this.denominacion = denominacion;
+		this.tipo = tipo;
+		this.tiposUva = tiposUva;
 	}
-	
-	@XmlAttribute(required=false)
+
 	public int getId() {
 		return id;
 	}
@@ -71,5 +72,18 @@ public class Vino {
 
 	public void setTiposUva(String[] tiposUva) {
 		this.tiposUva = tiposUva;
+	}
+
+	@Override
+	public String toString() {
+		return "Vino{" +
+				"id=" + id +
+				", nombre='" + nombre + '\'' +
+				", bodega='" + bodega + '\'' +
+				", añada=" + añada +
+				", denominacion='" + denominacion + '\'' +
+				", tipo='" + tipo + '\'' +
+				", tiposUva=" + tiposUva.toString() +
+				'}';
 	}
 }

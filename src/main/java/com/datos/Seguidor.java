@@ -1,19 +1,17 @@
 package com.datos;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlAttribute;
 
-@XmlRootElement(name = "usuario")
-public class Usuario {
+public class Seguidor {
 	private int id;
 	private String nombre;
 	private String fechaNacimiento;
 	private String email;
 	
-	public Usuario(String nombre) {
+	public Seguidor(String nombre, String fechaNacimiento, String email) {
 		this.nombre = nombre;
+		this.fechaNacimiento = fechaNacimiento;
+		this.email = email;
 	}
-	
-	@XmlAttribute(required=false)
+
 	public int getId() {
 		return id;
 	}
