@@ -3,6 +3,7 @@ import java.util.Arrays;
 import java.util.Date;
 import com.datos.ListaUsuarios;
 import com.datos.ListaVinos;
+import com.datos.Sistema;
 import com.datos.Usuario;
 import com.datos.Vino;
 import jakarta.ws.rs.Consumes;
@@ -22,7 +23,7 @@ import jakarta.ws.rs.PathParam;
 public class VinoRecurso {
     
     @GET
-    @Path("/{nombre}")
+    @Path("/{nombre_vino}")
     @Produces(MediaType.TEXT_HTML)
     public String getVino(@PathParam("nombre") String nombre) {
         Vino vino = ListaVinos.getVino(nombre);
@@ -51,6 +52,7 @@ public class VinoRecurso {
         }
         if(!ListaUsuarios.getUsuario(idUsuario).existeVino(nombre)){/*Compruebo si ya existe le vino */
             Vino vino = new Vino(nombre, bodega, añada, denominacion, tipo, tiposUva,puntuacion);/*si no esxite lo creo  */
+            vino.setId(Sistema.getId_vino());
             ListaUsuarios.getUsuario(idUsuario).addVino(vino);/*añado el vino a la lista de vinos de ese usuario */
             // Devolvemos una respuesta con código HTTP 201 Created
             return Response.status(Response.Status.CREATED).build();

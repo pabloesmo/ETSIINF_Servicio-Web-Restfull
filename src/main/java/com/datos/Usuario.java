@@ -18,11 +18,10 @@ public class Usuario {
 
 	}
 
-
 	public int getId() {
 		return id;
 	}
-	
+
 	public void setId(int id) {
 		this.id = id;
 	}
@@ -130,4 +129,9 @@ public class Usuario {
         }
         return false;
     }
+
+	public ArrayList<Seguidor> getSeguidores() {
+		// TODO Auto-generated method stub
+		return seguidores;
+	}
 }

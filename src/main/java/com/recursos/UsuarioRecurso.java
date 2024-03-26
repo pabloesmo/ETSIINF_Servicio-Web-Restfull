@@ -1,5 +1,6 @@
 package com.recursos;
 import com.datos.ListaUsuarios;
+import com.datos.Sistema;
 import com.datos.Usuario;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -41,6 +42,7 @@ public class UsuarioRecurso {
     public Response addUsuario(@FormParam("nombre") String nombre, @FormParam("fechaNacimiento") String fechaNacimiento, @FormParam("email") String correo) {
         if(!ListaUsuarios.existeUsuario(nombre)){
             Usuario usuario = new Usuario(nombre, fechaNacimiento, correo);
+            usuario.setId(Sistema.getId_usuario());
             ListaUsuarios.addUsuario(usuario);
             // Devolvemos una respuesta con código HTTP 201 Created
             return Response.status(Response.Status.CREATED).build();
@@ -53,6 +55,7 @@ public class UsuarioRecurso {
 
     //FUNCIONA!!
     @PUT
+    @Path("/{nombre}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response updateUsuario(@FormParam("nombre") String nombre, @FormParam("fechaNacimiento") String fechaNacimiento, @FormParam("email") String correo) {
         Usuario usuario = ListaUsuarios.getUsuario(nombre);
@@ -69,6 +72,7 @@ public class UsuarioRecurso {
 
     //FUNCIONA!!
     @DELETE
+    @Path("/{nombre}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response deleteUsuario(@FormParam("nombre") String nombre) {
         if(ListaUsuarios.existeUsuario(nombre)){
