@@ -1,7 +1,7 @@
 CREATE TABLE usuario (
 	id INT NOT NULL AUTO_INCREMENT,
     nombre VARCHAR(50) NOT NULL,
-    fechaNacimiento DATE NOT NULL,
+    fechaNacimiento VARCHAR(30) NOT NULL,
     email VARCHAR(100) NOT NULL,
     PRIMARY KEY(id)
 );
@@ -21,6 +21,10 @@ CREATE TABLE vino (
 
 CREATE TABLE listaSeguidores (
 	id_seguidor INT NOT NULL AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    nombre_usuario VARCHAR(50) NOT NULL,
+    fechaNacimiento_usuario VARCHAR(30) NOT NULL,
+    email_usuario VARCHAR(20) NOT NULL,
     PRIMARY KEY (id_seguidor),
     FOREIGN KEY (id_usuario) REFERENCES usuario(id),
     FOREIGN KEY (nombre_usuario) REFERENCES usuario(nombre),
