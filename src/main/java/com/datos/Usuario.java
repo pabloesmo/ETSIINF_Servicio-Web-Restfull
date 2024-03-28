@@ -9,6 +9,7 @@ public class Usuario {
 	private String email;
 	private ArrayList<Seguidor> seguidores;
 	private ArrayList<Vino> vinos;
+	
 	public Usuario(String nombre, String fechaNacimiento, String email) {
 		this.nombre = nombre;
 		this.fechaNacimiento = fechaNacimiento;
