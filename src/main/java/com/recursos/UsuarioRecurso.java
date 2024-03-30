@@ -97,6 +97,7 @@ public class UsuarioRecurso {
         for (Usuario usuario : ListaUsuarios.getUsuarios()) {
             html.append("<p>------------------------------------------------------------------------</p>");
             html.append("<div>");
+            html.append("<p><strong>Id:</strong> ").append(usuario.getId()).append("</p>");
             html.append("<p><strong>Nombre:</strong> ").append(usuario.getNombre()).append("</p>");
             html.append("<p><strong>Fecha de Nacimiento:</strong> ").append(usuario.getfechaNacimiento()).append("</p>");
             html.append("<p><strong>Email:</strong> ").append(usuario.getEmail()).append("</p>");
