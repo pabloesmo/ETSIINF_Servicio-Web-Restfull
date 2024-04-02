@@ -1,3 +1,7 @@
+CREATE USER 'vinosUser'@'localhost' IDENTIFIED BY 'vinosPass';
+GRANT ALL PRIVILEGES ON vinos.* TO 'vinosUser'@'localhost';
+FLUSH PRIVILEGES;
+
 DROP SCHEMA IF EXISTS vinos;
 CREATE SCHEMA vinos; 
 use vinos;
