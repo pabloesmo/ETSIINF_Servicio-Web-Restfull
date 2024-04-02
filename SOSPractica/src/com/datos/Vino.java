@@ -91,13 +91,13 @@ public class Vino {
 	@Override
 	public String toString() {
 		return "Vino{" +
-				"id=" + id +
-				", nombre='" + nombre + '\'' +
-				", bodega='" + bodega + '\'' +
-				", añada=" + añada +
-				", denominacion='" + denominacion + '\'' +
-				", tipo='" + tipo + '\'' +
-				", tiposUva=" + tiposUva +
+				"Id=" + id +
+				", Nombre='" + nombre + '\'' +
+				", Bodega='" + bodega + '\'' +
+				", Agnada=" + añada +
+				", Denominacion='" + denominacion + '\'' +
+				", Tipo='" + tipo + '\'' +
+				", TiposUva=" + tiposUva +
 				'}';
 	}
 }

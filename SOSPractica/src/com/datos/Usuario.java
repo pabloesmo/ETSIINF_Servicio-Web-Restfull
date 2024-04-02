@@ -16,14 +16,12 @@ public class Usuario{
 	private ArrayList<Seguidor> seguidores;
 	private ArrayList<Vino> vinos;
 	
-	public Usuario(String nombre, String fechaNacimiento, String email) {
-		this.nombre = nombre;
-		this.fechaNacimiento = fechaNacimiento;
-		this.email = email;
+	public Usuario() {
 		this.seguidores = new ArrayList<>();
 		this.vinos = new ArrayList<>();
 	}
 
+	
 	@XmlAttribute(required=false)
 	public int getId() {
 		return id_usuario;

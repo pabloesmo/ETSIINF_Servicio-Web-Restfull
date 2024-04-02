@@ -30,6 +30,7 @@ import org.apache.naming.NamingContext;
 import com.datos.*;
 
 
+
 @Path("/usuarios")
 public class UsuariosRecurso {
 
@@ -130,11 +131,14 @@ public class UsuariosRecurso {
         	if(fechaNac.after(fechaMayorEdad)) {
         		return Response.status(Response.Status.BAD_REQUEST).entity("El usuario debe ser mayor de edad.").build();
         	}
-        	String sql = "INSERT INTO `vinos`.`usuario` (`nombre`, `fechaNacimiento`, `email`) " + "VALUES ('"
-					+ usuario.getNombre() + "', '" + usuario.getfechaNacimiento() + "', '" + usuario.getEmail() + "');";
-			PreparedStatement ps = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
-			int affectedRows = ps.executeUpdate();
         	
+        	String sql = "INSERT INTO vinos.usuario (nombre, fechaNacimiento, email) VALUES (?,?,?)";
+        	PreparedStatement ps = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+        	ps.setString(1, usuario.getNombre());
+        	ps.setString(2,usuario.getfechaNacimiento());
+        	ps.setString(3, usuario.getEmail());
+        	
+			int affectedRows = ps.executeUpdate();
 			//obtener el ID del usuario creado
 			// Necesita haber indicado Statement.RETURN_GENERATED_KEYS al ejecutar un statement.executeUpdate() o al crear un PreparedStatement
         	ResultSet generatedID = ps.getGeneratedKeys();
@@ -206,7 +210,6 @@ public class UsuariosRecurso {
     //SOLUCIONADAAA!!
     @DELETE
     @Path("/{usuario_id}")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response deleteUsuario(@PathParam("usuario_id") int usuarioId) {
         try {
         	String sql = "DELETE FROM usuario WHERE id = ?";
@@ -227,6 +230,7 @@ public class UsuariosRecurso {
         }
     }
 
+    
     //SOLUCIONADAAA!!
     @GET
     @Produces(MediaType.TEXT_HTML)
@@ -266,20 +270,22 @@ public class UsuariosRecurso {
     }
     
     
+    
+    //ESTA YA FUNCIONA BIEN!!
     @GET
     @Path("/{usuario_id}/vinos")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response getVinos(@PathParam("usuario_id") int usuarioId) {
     	try {
-            String sql = "SELECT * FROM vino WHERE usuario_id = ?";
+            String sql = "SELECT * FROM vino WHERE id_usuario = ?";
       		PreparedStatement ps = conn.prepareStatement(sql);
+      		ps.setInt(1, usuarioId);
       		ResultSet rs = ps.executeQuery();
       		
       		ArrayList<Vino> vinos = new ArrayList<>();
       		
       		while(rs.next()) {
       			Vino vino = new Vino();
-      			vino.setId(rs.getInt("id"));
+      			vino.setId(rs.getInt("id_vino"));
       			vino.setNombre(rs.getString("nombre"));
       			vino.setBodega(rs.getString("bodega"));
       			vino.setAñada(rs.getInt("agnada"));
@@ -287,26 +293,29 @@ public class UsuariosRecurso {
       			vino.setTipo(rs.getString("tipo"));
       			vino.setTiposUva(rs.getString("tiposUva"));
       			vino.setPuntuacion(rs.getInt("puntuacion"));
+      			
+      			vinos.add(vino);
       		}
       		return Response.status(Response.Status.OK).entity(vinos).build();
     	} catch (SQLException e) {
-    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al obtener vinos\n" + e.getMessage()).build();
+    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al obtener vinos de la base de datos\n" + e.getMessage()).build();
     	}
     		
     }
-    
     
     
     //FUNCION PARA AÑADIR VINOS A LA LISTA DE CADA USUARIO
     //Pensar si la uri debe ser: <<</usuarios/Pepe/vinos>>> (Por nombre) o <<</usuarios/2/vinos>>> (Por id)
     //TODO REVISAR QUE EN LA CLASE DE USUARIOS Y VINOS ESTE LO DE XML nseq mas pero sirve para que el bicho lea
     //el xml/json y entienda el objeto raro que le paso. (XMLAttribute o nsq era)
+    
+    //ESTA YA FUNCIONA BIEN!!
     @POST 
     @Path("/{usuario_id}/vinos")
     @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 	public Response addVino(@PathParam("usuario_id") int usuarioId, Vino vino){
     	try {
-          String sql = "INSERT INTO vino (usuario_id, nombre, bodega, agnada, denominacion, tipo, tiposUva, puntuacion) " + 
+          String sql = "INSERT INTO vino (id_usuario, nombre, bodega, agnada, denominacion, tipo, tiposUva, puntuacion) " + 
         		  "VALUES (?,?,?,?,?,?,?,?)";
   		PreparedStatement ps = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
   		ps.setInt(1, usuarioId);
@@ -317,6 +326,7 @@ public class UsuariosRecurso {
   		ps.setString(6, vino.getTipo());
   		ps.setString(7, vino.getTiposUva());
   		ps.setInt(8, vino.getPuntuacion());
+  		
   		int affectedRows = ps.executeUpdate();
          	
   		//obtener el ID del vino creado
@@ -330,11 +340,89 @@ public class UsuariosRecurso {
           return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo agregar el vino").build();
           
          } catch (SQLException e) {
-        	 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al agregar vino\n" + e.getStackTrace()).build();
+        	 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al agregar vino en base de datos\n" + e.getStackTrace()).build();
          }
      }
     
-  
+    @PUT
+    @Path("/{usuario_id}/vinos/{vino_id}")
+    @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+    public Response updateVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId, Vino vino) {
+    	try {
+        	//ver si el vino pertenece a la lista o no
+        	if(!vinoPerteneceUsuario(usuarioId,vinoId)) {
+        		return Response.status(Response.Status.NOT_FOUND).entity("El vino no se encuentra en la lista del usuario").build();
+        	}
+        
+        	String sql = "UPDATE vino SET nombre = ?, bodega = ?, agnada = ?, denominacion = ?, tipo = ?, tiposUva = ?, puntuacion = ?"
+        			+ " WHERE id_vino = ? AND id_usuario = ?";
+        	PreparedStatement ps = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+      		ps.setString(1, vino.getNombre());
+      		ps.setString(2, vino.getBodega());
+      		ps.setInt(3, vino.getAñada());
+      		ps.setString(4, vino.getDenominacion());
+      		ps.setString(5, vino.getTipo());
+      		ps.setString(6, vino.getTiposUva());
+      		ps.setInt(7, vino.getPuntuacion());
+      		ps.setInt(8, vinoId);
+      		ps.setInt(9, usuarioId);
+      		int affectedRows = ps.executeUpdate();
+      		
+      		if(affectedRows > 0) {
+      			return Response.status(Response.Status.OK).entity("Vino actualizado correctamente").build();
+      		} else {
+      			return Response.status(Response.Status.NOT_FOUND).entity("No se encontro el vino").build();
+      		}
+    	}catch (SQLException e) {
+    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al actualizar el vino\n" + e.getMessage()).build();
+    	}
+    }
+    
+    
+    //ESTA YA FUNCIONA BIEN!!
+    @DELETE
+    @Path("/{usuario_id}/vinos/{vino_id}")
+    public Response deleteVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId) {
+        try {
+        	//ver si el vino pertenece a la lista o no
+        	if(!vinoPerteneceUsuario(usuarioId,vinoId)) {
+        		return Response.status(Response.Status.NOT_FOUND).entity("El vino no se encuentra en la lista del usuario").build();
+        	}
+        	
+        	String sql = "DELETE FROM vino WHERE id_vino = ? AND id_usuario = ?";
+        	PreparedStatement ps = conn.prepareStatement(sql);
+        	ps.setInt(1,vinoId);
+        	ps.setInt(2, usuarioId);
+        	int affectedRows = ps.executeUpdate();
+        	
+        	if(affectedRows > 0) {
+        		// Devolvemos una respuesta con código HTTP 200 OK
+        		return Response.status(Response.Status.OK).entity("Vino eliminado existosamente").build();
+        	} else {
+        		//Devolvemos una respuesta con código HTTP 404 Not Found
+        		return Response.status(Response.Status.NOT_FOUND).entity("No se encontro el vino").build();
+        	}
+        } catch(SQLException e) {
+        	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al eliminar el vino\n" + e.getMessage()).build();
+        }
+    }
+    
+    
+    //FUNCION AUXILIAR PARA BORRADO
+    private boolean vinoPerteneceUsuario(int usuarioId, int vinoId) throws SQLException {
+		String sql = "SELECT COUNT(*) AS count FROM vino WHERE id_vino = ? AND id_usuario = ?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setInt(1, vinoId);
+		ps.setInt(2, usuarioId);
+		ResultSet rs = ps.executeQuery();
+    	
+		if(rs.next()) {
+			int count = rs.getInt("count");
+			return count > 0;
+		} else {
+			return false;
+		}
+    }
     
     
 }
