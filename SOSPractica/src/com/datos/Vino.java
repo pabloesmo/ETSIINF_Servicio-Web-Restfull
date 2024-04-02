@@ -7,10 +7,10 @@ public class Vino {
 	private int añada;
 	private String denominacion;
 	private String tipo;
-	private String[] tiposUva;
+	private String tiposUva;
 	private int puntuacion;
 	
-	public Vino(String nombre, String bodega, int añada, String denominacion, String tipo, String[] tiposUva,int puntuacion) {
+	public Vino(String nombre, String bodega, int añada, String denominacion, String tipo, String tiposUva,int puntuacion) {
 		this.nombre = nombre;
 		this.bodega = bodega;
 		this.añada = añada;
@@ -72,11 +72,11 @@ public class Vino {
 		this.tipo = tipo;
 	}
 
-	public String[] getTiposUva() {
+	public String getTiposUva() {
 		return tiposUva;
 	}
 
-	public void setTiposUva(String[] tiposUva) {
+	public void setTiposUva(String tiposUva) {
 		this.tiposUva = tiposUva;
 	}
 	
@@ -97,7 +97,7 @@ public class Vino {
 				", añada=" + añada +
 				", denominacion='" + denominacion + '\'' +
 				", tipo='" + tipo + '\'' +
-				", tiposUva=" + tiposUva.toString() +
+				", tiposUva=" + tiposUva +
 				'}';
 	}
 }

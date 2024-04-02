@@ -2,6 +2,15 @@ package com.recursos;
 import com.datos.ListaUsuarios;
 import com.datos.Sistema;
 import com.datos.Usuario;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.naming.InitialContext;
+import org.apache.naming.NamingContext;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import com.basededatos.*;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.FormParam;
@@ -9,13 +18,38 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import javax.naming.NamingException;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.PathParam;
 
+
 @Path("/usuarios")
 public class UsuarioRecurso {
+
+    @Context
+	private UriInfo uriInfo;
+
+    private DataSource ds;
+    private Connection conn;
+
+    public UsuarioRecurso() {
+		InitialContext ctx;
+		try {
+			ctx = new InitialContext();
+			NamingContext envCtx = (NamingContext) ctx.lookup("java:comp/env");
+			ds = (DataSource) envCtx.lookup("jdbc/vinos");
+			conn = ds.getConnection();
+		} catch (NamingException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 
     //FUNCIONA!!
     @GET
@@ -44,12 +78,11 @@ public class UsuarioRecurso {
             Usuario usuario = new Usuario(nombre, fechaNacimiento, correo);
             usuario.setId(Sistema.getId_usuario());
             ListaUsuarios.addUsuario(usuario);
-            // Devolvemos una respuesta con código HTTP 201 Created
-            return Response.status(Response.Status.CREATED).build();
+                // Devolvemos una respuesta con código HTTP 201 Created
+                return Response.status(Response.Status.CREATED).build();
         }else{
-            System.out.println("El usuario ya existe");
-            // En este caso, podrías devolver un código de estado HTTP 409 Conflict para indicar que la operación no pudo completarse debido a un conflicto con el estado actual del recurso.
-            return Response.status(Response.Status.CONFLICT).build();
+            // Devolvemos una respuesta con código HTTP 500 Internal Server Error
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -108,4 +141,36 @@ public class UsuarioRecurso {
 
         return html.toString();
     }
+
+
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response crearUsuario(Usuario usuario){
+        try {
+            String sql = "INSERT INTO 'vinos'.'usuario' (`nombre`, `fechaNacimiento`, `email`) " + "VALUES ('"
+            + usuario.getNombre() + "', '" + usuario.getfechaNacimiento() + "', '" + usuario.getEmail() + "');";
+            PreparedStatement ps = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+			int affectedRows = ps.executeUpdate();
+            // Obtener el ID del elemento recién creado. 
+			// Necesita haber indicado Statement.RETURN_GENERATED_KEYS al ejecutar un statement.executeUpdate() o al crear un PreparedStatement
+			ResultSet generatedID = ps.getGeneratedKeys();
+            if (generatedID.next()) {
+                usuario.setId(generatedID.getInt(1));
+                String location = uriInfo.getAbsolutePath() + "/" + usuario.getId();
+                return Response.status(Response.Status.CREATED).entity(usuario).header("Location", location).header("Content-Location", location).build();
+			}
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo crear el usuario").build();
+			
+		} catch (SQLException e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo crear el usuario\n" + e.getStackTrace()).build();
+		}
+    }
+
+
+
+
+
+
+
+
 }

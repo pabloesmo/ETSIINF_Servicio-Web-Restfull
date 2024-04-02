@@ -285,7 +285,7 @@ public class UsuariosRecurso {
       			vino.setAñada(rs.getInt("agnada"));
       			vino.setDenominacion(rs.getString("denominacion"));
       			vino.setTipo(rs.getString("tipo"));
-      			//vino.setTiposUva(rs.getString("tiposUva"));
+      			vino.setTiposUva(rs.getString("tiposUva"));
       			vino.setPuntuacion(rs.getInt("puntuacion"));
       		}
       		return Response.status(Response.Status.OK).entity(vinos).build();
@@ -294,7 +294,6 @@ public class UsuariosRecurso {
     	}
     		
     }
-    
     
     
     
@@ -316,7 +315,7 @@ public class UsuariosRecurso {
   		ps.setInt(4, vino.getAñada());
   		ps.setString(5, vino.getDenominacion());
   		ps.setString(6, vino.getTipo());
-  		//ps.setArray(7, vino.getTiposUva());
+  		ps.setString(7, vino.getTiposUva());
   		ps.setInt(8, vino.getPuntuacion());
   		int affectedRows = ps.executeUpdate();
          	

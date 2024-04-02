@@ -1,9 +1,9 @@
 package com.datos;
-
 import java.util.ArrayList;
 
-public class Usuario {
-	private int id;
+
+public class Usuario{
+	private int id_usuario;
 	private String nombre;
 	private String fechaNacimiento;
 	private String email;
@@ -20,11 +20,11 @@ public class Usuario {
 	}
 
 	public int getId() {
-		return id;
+		return id_usuario;
 	}
 
 	public void setId(int id) {
-		this.id = id;
+		this.id_usuario = id;
 	}
 
 	public String getNombre() {
@@ -54,12 +54,17 @@ public class Usuario {
 	@Override
 	public String toString() {
 		return "Usuario => {" +
-				"id=" + id +
+				"id=" + id_usuario +
 				", nombre='" + nombre + '\'' +
 				", fechaNacimiento='" + fechaNacimiento + '\'' +
 				", email='" + email + '\'' +
 				'}';
 	}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public void addSeguidor(Seguidor seguidor){
 		seguidores.add(seguidor);
@@ -131,8 +136,8 @@ public class Usuario {
         return false;
     }
 
-	public ArrayList<Seguidor> getSeguidores() {
-		// TODO Auto-generated method stub
-		return seguidores;
-	}
+    public Seguidor[] getSeguidores() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getSeguidores'");
+    }
 }
