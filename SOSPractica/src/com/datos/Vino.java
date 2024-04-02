@@ -19,6 +19,10 @@ public class Vino {
 		this.tiposUva = tiposUva;
 		this.puntuacion = puntuacion;
 	}
+	
+	public Vino() {
+		
+	}
 
 	public int getId() {
 		return id;
@@ -74,6 +78,14 @@ public class Vino {
 
 	public void setTiposUva(String[] tiposUva) {
 		this.tiposUva = tiposUva;
+	}
+	
+	public int getPuntuacion() {
+		return puntuacion;
+	}
+	
+	public void setPuntuacion(int puntuacion) {
+		this.puntuacion = puntuacion;
 	}
 
 	@Override

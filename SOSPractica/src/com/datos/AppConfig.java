@@ -10,8 +10,8 @@ public class AppConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
-        classes.add(com.recursos.UsuarioRecurso.class);
-        classes.add(com.recursos.VinoRecurso.class);
+        classes.add(com.recursos.UsuariosRecurso.class);
+        classes.add(com.recursos.VinosRecurso.class);
         return classes;
     }
 }

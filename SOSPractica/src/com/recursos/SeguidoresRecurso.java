@@ -14,7 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("/seguidores")
-public class SeguidorRecurso {
+public class SeguidoresRecurso {
     /*Funcio para ver un seguidor */
     @GET
     @Path("/{id_usuario}/seguidor/id_seguidor")

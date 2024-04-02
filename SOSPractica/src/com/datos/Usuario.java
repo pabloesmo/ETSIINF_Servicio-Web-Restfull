@@ -1,7 +1,13 @@
 package com.datos;
 import java.util.ArrayList;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 
+
+@XmlRootElement(name = "usuario")
 public class Usuario{
 	private int id_usuario;
 	private String nombre;
@@ -14,11 +20,11 @@ public class Usuario{
 		this.nombre = nombre;
 		this.fechaNacimiento = fechaNacimiento;
 		this.email = email;
-		seguidores = new ArrayList<Seguidor>();
-		vinos = new ArrayList<Vino>();
-
+		this.seguidores = new ArrayList<>();
+		this.vinos = new ArrayList<>();
 	}
 
+	@XmlAttribute(required=false)
 	public int getId() {
 		return id_usuario;
 	}
@@ -139,5 +145,16 @@ public class Usuario{
     public Seguidor[] getSeguidores() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getSeguidores'");
+    }
+    
+    @XmlElementWrapper(name="vinos")
+    @XmlElement(name="vino") 
+    //@XmlTransient
+    public ArrayList<Vino> getVinos() {
+        return vinos;
+    }
+
+    public void setVinos(ArrayList<Vino> vinos) {
+        this.vinos = vinos;
     }
 }
