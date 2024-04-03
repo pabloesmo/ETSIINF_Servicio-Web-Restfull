@@ -1,18 +1,33 @@
 package com.recursos;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.ws.rs.*;
+import javax.sql.DataSource;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.apache.naming.NamingContext;
 import com.datos.*;
-
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.core.MediaType;
 
 @Path("/usuarios")
 public class UsuariosRecurso {
@@ -38,41 +53,63 @@ public class UsuariosRecurso {
 	}
 
     
-    //SOLUCIONADAAAA!!
+    //ESTE ES EL GET TOCHO QUE DEVUELVE LAS URIS DE LOS USUARIOS QUE HAY
+ 	@GET
+ 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+ 	public Response getUsuarios(@QueryParam("offset") @DefaultValue("1") String offset,
+ 			@QueryParam("count") @DefaultValue("10") String count) {
+ 		try {
+ 			int off = Integer.parseInt(offset);
+ 			int c = Integer.parseInt(count);
+ 			String sql = "SELECT * FROM usuario order by id LIMIT " + (off - 1) + "," + c + ";";
+ 			PreparedStatement ps = conn.prepareStatement(sql);
+ 			ResultSet rs = ps.executeQuery();
+ 			Usuarios u = new Usuarios();
+ 			ArrayList<Link> usuarios = u.getUsuarios();
+ 			rs.beforeFirst();
+ 			while (rs.next()) {
+ 				usuarios.add(new Link(uriInfo.getAbsolutePath() + "/" + rs.getString("nombre"),"self"));
+ 			}
+ 			return Response.status(Response.Status.OK).entity(u).build(); // No se puede devolver el ArrayList (para generar XML)
+ 		} catch (NumberFormatException e) {
+ 			return Response.status(Response.Status.BAD_REQUEST).entity("No se pudieron convertir los índices a números")
+ 					.build();
+ 		} catch (SQLException e) {
+ 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error de acceso a BBDD").build();
+ 		}
+ 	} 
+    
+    
+    //YA FUNCIONA!!
     //TODO HABRIA QUE CAMBIAR EL MODO DE DEVOLUCION PARA DEVOLVER LO QUE ELLOS QUIEREN
+    //ESTA FUNCION ES: lista de usuarios con filtro de nombre (si 2 empiezan por Pe- pues aparecen ambos
     @GET
     @Path("/{nombre}")
-    @Produces(MediaType.TEXT_HTML)
-    public String getUsuario(@PathParam("nombre") String nombre) {
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUsuarios(@PathParam("nombre") String nombre) {
     	try {
     		String sql = "SELECT * FROM usuario WHERE nombre LIKE ?";
     		PreparedStatement ps = conn.prepareStatement(sql);
     		ps.setString(1, nombre + "%");
     		ResultSet rs = ps.executeQuery();
     		
-    		StringBuilder usuariosHTML = new StringBuilder("<html><body><h2>Usuarios encontrados:</h2></body></html>");
+    		ArrayList<Usuario> usuarios = new ArrayList<>();
     		
     		while (rs.next()) {
-    			String nombreUsuario = rs.getString("nombre");
-    			String fechaNacimiento = rs.getString("fechaNacimiento");
-    			String email = rs.getString("email");
+    			Usuario usuario = new Usuario();
+    			usuario.setId(rs.getInt("id"));
+    			usuario.setNombre(rs.getString("nombre"));
+    			usuario.setfechaNacimiento(rs.getString("fechaNacimiento"));
+    			usuario.setEmail(rs.getString("email")); 
     			
-    			usuariosHTML.append("<li><strong>Nombre:</strong> ").append(nombreUsuario).append("<br>")
-    			.append("<strong>Fecha de Nacimiento:</strong> ").append(fechaNacimiento).append("<br>")
-    			.append("<strong>Email: </strong> ").append(email).append("</li>");
+    			usuarios.add(usuario);
     		}
-    		
-    		usuariosHTML.append("</u1></body></html>");
-    		
-    		if(usuariosHTML.toString().equals("<html><body><h2>Usuarios encontrados:</h2></body></html>")) {
-    			return "<html><body><h2>No se encontraron usuarios</h2></body></html>";
-    		}
-    		return usuariosHTML.toString();
+    		return Response.status(Response.Status.OK).entity(usuarios).build();
     	} catch(SQLException e) {
-    		e.printStackTrace();
-    		return "<html><body><h2>Error al buscar usuarios</h2></body></html>";
+    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al obtener usuarios de la base de datos\n" + e.getMessage()).build();
     	}
     }
+    
     
 	//YA FUNCIONA!!!
   	@POST
@@ -111,36 +148,8 @@ public class UsuariosRecurso {
 		}
   	}
     
- // Lista de garajes JSON/XML generada con listas en JAXB
-    //AQUI PODEMOS VER COMO HACER EL FILTRADO!!!!
 
-// 	@GET
-// 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
-// 	public Response getUsuarios(@QueryParam("offset") @DefaultValue("1") String offset,
-// 			@QueryParam("count") @DefaultValue("10") String count) {
-// 		try {
-// 			int off = Integer.parseInt(offset);
-// 			int c = Integer.parseInt(count);
-// 			String sql = "SELECT * FROM usuario order by id LIMIT " + (off - 1) + "," + c + ";";
-// 			PreparedStatement ps = conn.prepareStatement(sql);
-// 			ResultSet rs = ps.executeQuery();
-// 			Usuarios u = new Usuarios();
-// 			ArrayList<Link> usuarios = u.getUsuarios();
-// 			rs.beforeFirst();
-// 			while (rs.next()) {
-// 				usuarios.add(new Link(uriInfo.getAbsolutePath() + "/" + rs.getInt("id"),"self"));
-// 			}
-// 			return Response.status(Response.Status.OK).entity(g).build(); // No se puede devolver el ArrayList (para generar XML)
-// 		} catch (NumberFormatException e) {
-// 			return Response.status(Response.Status.BAD_REQUEST).entity("No se pudieron convertir los índices a números")
-// 					.build();
-// 		} catch (SQLException e) {
-// 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error de acceso a BBDD").build();
-// 		}
-// 	} 
-
-
-    /* 
+  	//YA FUNCIONA!!!
 	@PUT
     @Path("/{usuario_id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -149,60 +158,26 @@ public class UsuariosRecurso {
         	String sql = "UPDATE usuario SET nombre = ?, fechaNacimiento = ?, email = ? WHERE id = ?";
         	PreparedStatement ps = conn.prepareStatement(sql);
         	ps.setString(1, usuarioNuevo.getNombre());
-        	ps.setString(2, usuarioNuevo.getFechaNacimiento());
+        	ps.setString(2, usuarioNuevo.getfechaNacimiento());
         	ps.setString(3, usuarioNuevo.getEmail());
         	ps.setInt(4, usuarioId);
         	
         	int affectedRows = ps.executeUpdate();
         	if(affectedRows > 0) {
-        		return Response.status(Response.Status.OK).build();
+        		String location = uriInfo.getBaseUri() + "usuarios/" + usuarioNuevo.getId();
+    			return Response.status(Response.Status.OK).entity(usuarioNuevo).header("Content-Location", location).build();
         	} else {
         		return Response.status(Response.Status.NOT_FOUND).build();
         	}
         } catch (SQLException e) {
-        	e.printStackTrace();
-        	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al actualizar usuario").build();
+        	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al actualizar usuario\n" + e.getStackTrace()).build();
         }
-    }*/
+    }
     
-	//TODO HAY QUE PROBAR QUE ESTA FUNCIONA!!
-	@PUT
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("{/usuario_id}")
-	public Response updateUsuario(@PathParam("usuario_id") String usuarioId, Usuario usuarioNuevo) throws ParseException {
-		try {
-			Usuario usuario;
-			int int_id = Integer.parseInt(id);
-			String sql = "SELECT * FROM usuario WHERE id = " + int_id + ";";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				usuario =  usuarioFromRS(rs);
-			} else {
-				return Response.status(Response.Status.NOT_FOUND).entity("Elemento no encontrado").build();
-			}
-			usuario.setNombre(usuarioNuevo.getNombre());
-			usuario.setfechaNacimiento(usuarioNuevo.getfechaNacimiento());
-			usuario.setEmail(usuarioNuevo.getEmail());
-		
-			sql = "UPDATE `vinos`.`usuario` SET "
-					+ "`nombre`='" + usuario.getNombre() 
-					+ "', `fechaNacimiento`='" + usuario.getfechaNacimiento() 
-					+ "', `email`='" + usuario.getEmail() + "';";
-			ps = conn.prepareStatement(sql);
-			int affectedRows = ps.executeUpdate();
-			
-			// Location a partir del URI base (host + root de la aplicación + ruta del servlet)
-			String location = uriInfo.getBaseUri() + "usuarios/" + usuario.getId();
-			return Response.status(Response.Status.OK).entity(usuario).header("Content-Location", location).build();			
-		} catch (SQLException e) {
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo actualizar el usuario\n" + e.getStackTrace()).build();
-		}
-	}
-
+	
     //YA FUNCIONA!!!
     @DELETE
-    @Path("/{usuario_id}")
+    @Path("{usuario_id}")
     public Response deleteUsuario(@PathParam("usuario_id") int usuarioId) {
         try {
         	String sql = "DELETE FROM usuario WHERE id = ?";
@@ -218,49 +193,8 @@ public class UsuariosRecurso {
         			return Response.status(Response.Status.NOT_FOUND).build();
         		}
         	} catch(SQLException e) {
-        	e.printStackTrace();
-        	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al eliminar usuario").build();
+        	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al eliminar usuario\n" + e.getStackTrace()).build();
         }
-    }
-
-    
-    //ESTA FUNCIONA BIEN 100%!!
-    //TODO HABRIA QUE CAMBIAR EL MODO DE DEVOLUCION
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String getUsuarios() {
-        StringBuilder html = new StringBuilder();
-        html.append("<html>");
-        html.append("<head><title>Usuarios</title></head>");
-        html.append("<body>");
-        html.append("<h1>Lista de Usuarios</h1>");
-        
-        try {
-        	String sql = "SELECT * FROM usuario";
-        	PreparedStatement ps = conn.prepareStatement(sql);
-        	ResultSet rs = ps.executeQuery();
-        	
-        	while(rs.next()) {
-        		int id = rs.getInt("id");
-        		String nombre = rs.getString("nombre");
-        		String fechaNacimiento = rs.getString("fechaNacimiento");
-        		String email = rs.getString("email");
-	            html.append("<p>------------------------------------------------------------------------</p>");
-	            html.append("<div>");
-	            html.append("<p><strong>Id:</strong> ").append(id).append("</p>");
-	            html.append("<p><strong>Nombre:</strong> ").append(nombre).append("</p>");
-	            html.append("<p><strong>Fecha de Nacimiento:</strong> ").append(fechaNacimiento).append("</p>");
-	            html.append("<p><strong>Email:</strong> ").append(email).append("</p>");
-	            html.append("</div>");
-	        }
-        }catch (SQLException e){
-        	e.printStackTrace();
-        	html.append("<p>Error al obtener la lista de usuarios</p>");
-        }
-        
-        html.append("</body>");
-        html.append("</html>");
-        return html.toString();
     }
     
 
@@ -290,8 +224,7 @@ public class UsuariosRecurso {
       			vino.setAñada(rs.getInt("agnada"));
       			vino.setDenominacion(rs.getString("denominacion"));
       			vino.setTipo(rs.getString("tipo"));
-      			vino.setTiposUva(rs.getString("tiposUva"));
-      			vino.setPuntuacion(rs.getInt("puntuacion"));
+      			vino.setPuntuacion(rs.getDouble("puntuacion"));
       			
       			vinos.add(vino);
       		}
@@ -312,7 +245,11 @@ public class UsuariosRecurso {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response addVino(@PathParam("usuario_id") int usuarioId, Vino vino) {
 		try {
-			String sql = "INSERT INTO vino (id_usuario, nombre, bodega, agnada, denominacion, tipo, tiposUva, puntuacion) "
+			double puntuacion = vino.getPuntuacion();
+			if(puntuacion < 0 || puntuacion > 10) {
+				return Response.status(Response.Status.BAD_REQUEST).entity("Error: La puntuacion debe estar entre 0 y 10").build();
+			}
+			String sql = "INSERT INTO vino (id_usuario, nombre, bodega, agnada, denominacion, tipo, puntuacion) "
 					+
 					"VALUES (?,?,?,?,?,?,?,?)";
 			PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -322,8 +259,7 @@ public class UsuariosRecurso {
 			ps.setInt(4, vino.getAñada());
 			ps.setString(5, vino.getDenominacion());
 			ps.setString(6, vino.getTipo());
-			ps.setString(7, vino.getTiposUva());
-			ps.setInt(8, vino.getPuntuacion());
+			ps.setDouble(7, puntuacion);
 
 			int affectedRows = ps.executeUpdate();
 
@@ -357,14 +293,17 @@ public class UsuariosRecurso {
 				return Response.status(Response.Status.NOT_FOUND)
 						.entity("El vino no se encuentra en la lista del usuario").build();
 			}
+			
+			double puntuacion = vino.getPuntuacion();
+			if(puntuacion < 0 || puntuacion > 10) {
+				return Response.status(Response.Status.BAD_REQUEST).entity("Error: La puntuacion debe estar entre 0 y 10").build();
+			}
 
-			//TODO:REVISAR QUE SOLO SEA LA PUNTUACION LO QUE SE MODIFICA
 			String sql = "UPDATE vino SET puntuacion = ? WHERE id_vino = ? AND id_usuario = ?";
 			PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			ps.setInt(1, vino.getPuntuacion());
+			ps.setDouble(1, puntuacion);
 			ps.setInt(2, vinoId);
 			ps.setInt(3, usuarioId);
-			
 			int affectedRows = ps.executeUpdate();
 
 			if (affectedRows > 0) {
@@ -432,7 +371,7 @@ public class UsuariosRecurso {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//TODO: FUNCION EN PROCESO...
+	//YA FUNCIONA!!!
 	@GET
 	@Path("/{usuario_id}/seguidores")
 	public Response getSeguidores(@PathParam("usuario_id") int usuarioId, @QueryParam("nombre") String nombre, @QueryParam("limit") int limit) {
@@ -496,7 +435,7 @@ public class UsuariosRecurso {
 		}
 	}
 
-	//TODO: FUNCION EN PROCESO...
+	//YA FUNCIONA!!!
 	@DELETE
 	@Path("/{seguidor_id}/seguimiento/{usuario_seguido_id}")
 	public Response deleteSeguidor(@PathParam("seguidor_id") int seguidorId, @PathParam("usuario_seguido_id") int usuarioSeguidoId){

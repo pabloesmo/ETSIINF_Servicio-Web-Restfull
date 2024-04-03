@@ -11,13 +11,9 @@ public class Usuario{
 	private String nombre;
 	private String fechaNacimiento;
 	private String email;
-	private ArrayList<Seguidor> seguidores;
+	private ArrayList<Usuario> seguidores;
 	private ArrayList<Vino> vinos;
 	
-	/*public Usuario() {
-		this.seguidores = new ArrayList<>();
-		this.vinos = new ArrayList<>();
-	}*/
 	
 	public Usuario(String nombre, String fechaNacimiento, String email) {
 		this.nombre = nombre;

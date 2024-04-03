@@ -11,7 +11,6 @@ public class AppConfig extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<Class<?>>();
         classes.add(com.recursos.UsuariosRecurso.class);
-        classes.add(com.recursos.VinosRecurso.class);
         return classes;
     }
 }
