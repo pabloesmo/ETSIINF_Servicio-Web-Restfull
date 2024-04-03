@@ -13,9 +13,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+/*
 @Path("/seguidores")
 public class SeguidoresRecurso {
-    /*Funcio para ver un seguidor */
     @GET
     @Path("/{id_usuario}/seguidor/id_seguidor")
     @Produces(MediaType.TEXT_HTML)
@@ -37,20 +37,21 @@ public class SeguidoresRecurso {
             }
         }
     }
-    /*Funcion para crear un seguidor */
+    
+    
     @POST
     @Path("/{id_usuario}/seguidor/{id_seguidor}")
     public Response addSeguidor(@PathParam("id_usuario") int idUsuario, @PathParam("id_seguidor") int idSeguidor) {
-       if(ListaUsuarios.getUsuario(idUsuario) == null){/*Compruebo si existe el usuario */
+       if(ListaUsuarios.getUsuario(idUsuario) == null){/
            return Response.status(Response.Status.NOT_FOUND).build();
        }
-       if(ListaUsuarios.existeUsuario(idSeguidor)){/*Compruebo si ya existe le seguidor */
-            if(ListaUsuarios.getUsuario(idUsuario).existeSeguidor(idSeguidor)){/*Compruebo si ya existe le seguidor */
+       if(ListaUsuarios.existeUsuario(idSeguidor)){
+            if(ListaUsuarios.getUsuario(idUsuario).existeSeguidor(idSeguidor)){
                 return Response.status(Response.Status.CONFLICT).build();
             }
-           Seguidor seguidor = new Seguidor(ListaUsuarios.getUsuario(idSeguidor).getNombre(), ListaUsuarios.getUsuario(idSeguidor).getfechaNacimiento(), ListaUsuarios.getUsuario(idSeguidor).getEmail());/*si no esxite lo creo  */
+           Seguidor seguidor = new Seguidor(ListaUsuarios.getUsuario(idSeguidor).getNombre(), ListaUsuarios.getUsuario(idSeguidor).getfechaNacimiento(), ListaUsuarios.getUsuario(idSeguidor).getEmail());
            seguidor.setId(Sistema.getId_seguidor());
-           ListaUsuarios.getUsuario(idUsuario).addSeguidor(seguidor);/*añado el seguidor a la lista de seguidores de ese usuario */
+           ListaUsuarios.getUsuario(idUsuario).addSeguidor(seguidor);
            // Devolvemos una respuesta con código HTTP 201 Created
            return Response.status(Response.Status.CREATED).build();
         }else{
@@ -58,8 +59,8 @@ public class SeguidoresRecurso {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
     }
-    /*funcion para cojer la lista de seguidores
-     */
+    
+    
     @GET
     @Path("/{id_usuario}/seguidores")
     @Produces(MediaType.TEXT_HTML)
@@ -83,5 +84,4 @@ public class SeguidoresRecurso {
         return html.toString();
     }
     
-
-}
+}*/

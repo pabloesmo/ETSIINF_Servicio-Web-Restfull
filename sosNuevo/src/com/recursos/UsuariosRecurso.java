@@ -30,7 +30,6 @@ import org.apache.naming.NamingContext;
 import com.datos.*;
 
 
-
 @Path("/usuarios")
 public class UsuariosRecurso {
 
@@ -54,35 +53,40 @@ public class UsuariosRecurso {
 		}
 	}
 
-
+    
     //SOLUCIONADAAAA!!
+    //TODO HABRIA QUE CAMBIAR EL MODO DE DEVOLUCION PARA DEVOLVER LO QUE ELLOS QUIEREN
     @GET
     @Path("/{nombre}")
     @Produces(MediaType.TEXT_HTML)
     public String getUsuario(@PathParam("nombre") String nombre) {
     	try {
-    		String sql = "SELECT * FROM usuario WHERE nombre = ?";
+    		String sql = "SELECT * FROM usuario WHERE nombre LIKE ?";
     		PreparedStatement ps = conn.prepareStatement(sql);
-    		ps.setString(1, nombre);
+    		ps.setString(1, nombre + "%");
     		ResultSet rs = ps.executeQuery();
     		
-    		if(rs.next()) {
+    		StringBuilder usuariosHTML = new StringBuilder("<html><body><h2>Usuarios encontrados:</h2></body></html>");
+    		
+    		while (rs.next()) {
     			String nombreUsuario = rs.getString("nombre");
     			String fechaNacimiento = rs.getString("fechaNacimiento");
     			String email = rs.getString("email");
     			
-    			return "<html><body>" +
-                "<h2>Detalles del Usuario</h2>" +
-                "<p><strong>Nombre:</strong> " + nombreUsuario + "</p>" +
-                "<p><strong>Fecha de Nacimiento:</strong> " + fechaNacimiento + "</p>" +
-                "<p><strong>Email:</strong> " + email + "</p>" +
-                "</body></html>";
-    		} else {
-    			return "<html><body><h2>Usuario no encontrado</h2></body></html>";
+    			usuariosHTML.append("<li><strong>Nombre:</strong> ").append(nombreUsuario).append("<br>")
+    			.append("<strong>Fecha de Nacimiento:</strong> ").append(fechaNacimiento).append("<br>")
+    			.append("<strong>Email: </strong> ").append(email).append("</li>");
     		}
+    		
+    		usuariosHTML.append("</u1></body></html>");
+    		
+    		if(usuariosHTML.toString().equals("<html><body><h2>Usuarios encontrados:</h2></body></html>")) {
+    			return "<html><body><h2>No se encontraron usuarios</h2></body></html>";
+    		}
+    		return usuariosHTML.toString();
     	} catch(SQLException e) {
     		e.printStackTrace();
-    		return "<html><body><h2>Error al obtener el usuario</h2></body></html>";
+    		return "<html><body><h2>Error al buscar usuarios</h2></body></html>";
     	}
     }
     
@@ -117,44 +121,51 @@ public class UsuariosRecurso {
 //        	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al agregar usuario").build();
 //        }
 //    }
-    
-    
-    //VERSION CON XML Y JSON COMO CONSUMES
-    @POST
-    @Consumes({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML})
-    public Response addUsuario(Usuario usuario) throws ParseException {
-        try {
-        	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        	Date fechaNac = sdf.parse(usuario.getfechaNacimiento());
-        	Date fechaMayorEdad = new Date(System.currentTimeMillis() - (18L * 365 * 24 * 60 * 60 * 1000));
-        	
-        	if(fechaNac.after(fechaMayorEdad)) {
-        		return Response.status(Response.Status.BAD_REQUEST).entity("El usuario debe ser mayor de edad.").build();
-        	}
-        	
-        	String sql = "INSERT INTO vinos.usuario (nombre, fechaNacimiento, email) VALUES (?,?,?)";
-        	PreparedStatement ps = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
-        	ps.setString(1, usuario.getNombre());
-        	ps.setString(2,usuario.getfechaNacimiento());
-        	ps.setString(3, usuario.getEmail());
-        	
-			int affectedRows = ps.executeUpdate();
-			//obtener el ID del usuario creado
-			// Necesita haber indicado Statement.RETURN_GENERATED_KEYS al ejecutar un statement.executeUpdate() o al crear un PreparedStatement
-        	ResultSet generatedID = ps.getGeneratedKeys();
-        	if(generatedID.next()) {
-        		usuario.setId(generatedID.getInt(1));
-        		String location = uriInfo.getAbsolutePath() + "" + usuario.getId();
-        		return Response.status(Response.Status.CREATED).entity(usuario).header("Location", location).header("Content-Location", location).build();
-        	}
-        	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo crear el usuario").build();
+
         
-        } catch (SQLException e) {
-        	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al agregar usuario\n" + e.getStackTrace()).build();
-        }
-    }
+
+    
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response addUsuario(Usuario usuario) throws ParseException {
+      try {
+      	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+      	Date fechaNac = sdf.parse(usuario.getfechaNacimiento());
+      	Date fechaMayorEdad = new Date(System.currentTimeMillis() - (18L * 365 * 24 * 60 * 60 * 1000));
+      	
+      	if(fechaNac.after(fechaMayorEdad)) {
+      		return Response.status(Response.Status.BAD_REQUEST).entity("El usuario debe ser mayor de edad.").build();
+      	}
+      	String sql = "INSERT INTO vinos.usuario (nombre, fechaNacimiento, email) " + 
+      				"VALUES (?,?,?)";
+      	PreparedStatement ps = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+      	ps.setString(1, usuario.getNombre());
+      	ps.setString(2,usuario.getfechaNacimiento());
+      	ps.setString(3, usuario.getEmail());
+      	
+		int affectedRows = ps.executeUpdate();
+		//obtener el ID del usuario creado
+		// Necesita haber indicado Statement.RETURN_GENERATED_KEYS al ejecutar un statement.executeUpdate() o al crear un PreparedStatement
+      	ResultSet generatedID = ps.getGeneratedKeys();
+      	if(generatedID.next()) {
+      		usuario.setId(generatedID.getInt(1));
+      		String location = uriInfo.getAbsolutePath().toString() + "" + usuario.getId();
+      		
+      		//AQUI ESTABA EL ERROR!!! EN entity(usuario)
+      		//SOLUCIONADO!!
+      		return Response.status(Response.Status.CREATED).entity(usuario).header("Location", location).header("Content-Location", location).build();
+      	}
+      	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo crear el usuario").build();
+      } catch (SQLException e) {
+      	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al agregar usuario\n" + e.getStackTrace()).build();
+      }
+  }
     
  // Lista de garajes JSON/XML generada con listas en JAXB
+    //AQUI PODEMOS VER COMO HACER EL FILTRADO!!!!
+    
+    
+    
 // 	@GET
 // 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
 // 	public Response getUsuarios(@QueryParam("offset") @DefaultValue("1") String offset,
@@ -181,7 +192,8 @@ public class UsuariosRecurso {
 // 	} 
 
         
-    //SOLUCIONADAAA!!
+    //
+    //TODO HAY QUE CAMBIARLO POR JSON O XML 
     @PUT
     @Path("/{usuario_id}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -207,7 +219,7 @@ public class UsuariosRecurso {
     }
     
 
-    //SOLUCIONADAAA!!
+    //ESTA FUNCIONA BIEN 100%!!
     @DELETE
     @Path("/{usuario_id}")
     public Response deleteUsuario(@PathParam("usuario_id") int usuarioId) {
@@ -231,7 +243,8 @@ public class UsuariosRecurso {
     }
 
     
-    //SOLUCIONADAAA!!
+    //ESTA FUNCIONA BIEN 100%!!
+    //TODO HABRIA QUE CAMBIAR EL MODO DE DEVOLUCION
     @GET
     @Produces(MediaType.TEXT_HTML)
     public String getUsuarios() {
@@ -271,7 +284,7 @@ public class UsuariosRecurso {
     
     
     
-    //ESTA YA FUNCIONA BIEN!!
+    //ESTA FUNCIONA BIEN 100%!!
     @GET
     @Path("/{usuario_id}/vinos")
     public Response getVinos(@PathParam("usuario_id") int usuarioId) {
@@ -309,10 +322,10 @@ public class UsuariosRecurso {
     //TODO REVISAR QUE EN LA CLASE DE USUARIOS Y VINOS ESTE LO DE XML nseq mas pero sirve para que el bicho lea
     //el xml/json y entienda el objeto raro que le paso. (XMLAttribute o nsq era)
     
-    //ESTA YA FUNCIONA BIEN!!
+    //ESTA FUNCIONA BIEN 100%!!
     @POST 
     @Path("/{usuario_id}/vinos")
-    @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+    @Consumes(MediaType.APPLICATION_JSON)
 	public Response addVino(@PathParam("usuario_id") int usuarioId, Vino vino){
     	try {
           String sql = "INSERT INTO vino (id_usuario, nombre, bodega, agnada, denominacion, tipo, tiposUva, puntuacion) " + 
@@ -334,7 +347,7 @@ public class UsuariosRecurso {
          ResultSet generatedID = ps.getGeneratedKeys();
           if(generatedID.next()) {
           	vino.setId(generatedID.getInt(1));
-          	String location = uriInfo.getAbsolutePath() + "" + vino.getId();
+          	String location = uriInfo.getAbsolutePath().toString() + "/" + vino.getId();
           	return Response.status(Response.Status.CREATED).entity(vino).header("Location", location).header("Content-Location", location).build();
           }
           return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo agregar el vino").build();
@@ -344,6 +357,9 @@ public class UsuariosRecurso {
          }
      }
     
+    
+    
+    //ESTA FUNCIONA BIEN 100%!!
     @PUT
     @Path("/{usuario_id}/vinos/{vino_id}")
     @Consumes({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
@@ -379,7 +395,7 @@ public class UsuariosRecurso {
     }
     
     
-    //ESTA YA FUNCIONA BIEN!!
+    //ESTA FUNCIONA BIEN 100%!!
     @DELETE
     @Path("/{usuario_id}/vinos/{vino_id}")
     public Response deleteVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId) {
@@ -423,6 +439,36 @@ public class UsuariosRecurso {
 			return false;
 		}
     }
+    
+    
+    @POST
+    @Path("/{seguidor_id}/seguir/{usuario_seguido_id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response seguirUsuario(@PathParam("seguidor_id") int seguidorId,
+    							@PathParam("usuario_seguido_id") int usuarioSeguidoId) {
+    	try {
+    		String sql = "INSERT INTO seguimiento(seguidor_id, usuario_seguido_id) VALUES (?, ?)";
+    		PreparedStatement ps = conn.prepareStatement(sql);
+    		ps.setInt(1, seguidorId);
+    		ps.setInt(2, usuarioSeguidoId);
+    		int rowsAffected = ps.executeUpdate();
+    		
+    		if(rowsAffected > 0) {
+    			return Response.status(Response.Status.CREATED).entity("Se ha añadido el seguidor correctamente.").build();
+    		} else {
+    			return Response.status(Response.Status.CREATED).entity("No se ha podido añadir el seguidor.").build();
+    		}
+    	} catch(SQLException e) {
+    		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al añadir el seguidor\n" + e.getMessage()).build();
+    	}
+    }
+    
+    
+    
+    
+    
+    
+    
     
     
 }
