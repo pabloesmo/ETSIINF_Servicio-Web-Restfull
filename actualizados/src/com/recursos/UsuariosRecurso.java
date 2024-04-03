@@ -177,7 +177,7 @@ public class UsuariosRecurso {
 	
     //YA FUNCIONA!!!
     @DELETE
-    @Path("{usuario_id}")
+    @Path("/{usuario_id}")
     public Response deleteUsuario(@PathParam("usuario_id") int usuarioId) {
         try {
         	String sql = "DELETE FROM usuario WHERE id = ?";
@@ -205,16 +205,15 @@ public class UsuariosRecurso {
     
 	
 	//YA FUNCIONA!!!
-    @GET
+    /*@GET
     @Path("/{usuario_id}/vinos")
     public Response getVinos(@PathParam("usuario_id") int usuarioId) {
     	try {
-            String sql = "SELECT * FROM vino WHERE id_usuario = ?";
+            String sql = "SELECT * FROM vinos_usuarios WHERE id_usuario = ?";
       		PreparedStatement ps = conn.prepareStatement(sql);
       		ps.setInt(1, usuarioId);
       		ResultSet rs = ps.executeQuery();
       		
-      		ArrayList<Vino> vinos = new ArrayList<>();
       		
       		while(rs.next()) {
       			Vino vino = new Vino();
@@ -233,55 +232,111 @@ public class UsuariosRecurso {
     		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al obtener vinos de la base de datos\n" + e.getMessage()).build();
     	}
     		
-    }
+    }*/
     
     
     //FUNCION PARA AÑADIR VINOS A LA LISTA DE CADA USUARIO
     //Pensar si la uri debe ser: <<</usuarios/Pepe/vinos>>> (Por nombre) o <<</usuarios/2/vinos>>> (Por id)
     
     //YA FUNCIONA!!!
+//    @POST
+//	@Path("/{usuario_id}/vinos")
+//	@Consumes(MediaType.APPLICATION_JSON)
+//	public Response addVino(@PathParam("usuario_id") int usuarioId, Vino vino) {
+//		try {
+//			double puntuacion = vino.getPuntuacion();
+//			if(puntuacion < 0 || puntuacion > 10) {
+//				return Response.status(Response.Status.BAD_REQUEST).entity("Error: La puntuacion debe estar entre 0 y 10").build();
+//			}
+//			String sql = "INSERT INTO vino (id_usuario, nombre, bodega, agnada, denominacion, tipo, puntuacion) "
+//					+
+//					"VALUES (?,?,?,?,?,?,?,?)";
+//			PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+//			ps.setInt(1, usuarioId);
+//			ps.setString(2, vino.getNombre());
+//			ps.setString(3, vino.getBodega());
+//			ps.setInt(4, vino.getAñada());
+//			ps.setString(5, vino.getDenominacion());
+//			ps.setString(6, vino.getTipo());
+//			ps.setDouble(7, puntuacion);
+//
+//			int affectedRows = ps.executeUpdate();
+//
+//			// obtener el ID del vino creado
+//			// Necesita haber indicado Statement.RETURN_GENERATED_KEYS al ejecutar un
+//			// statement.executeUpdate() o al crear un PreparedStatement
+//			ResultSet generatedID = ps.getGeneratedKeys();
+//			if (generatedID.next()) {
+//				vino.setId(generatedID.getInt(1));
+//				String location = uriInfo.getAbsolutePath().toString() + "/" + vino.getId();
+//				return Response.status(Response.Status.CREATED).entity(vino).header("Location", location)
+//						.header("Content-Location", location).build();
+//			}
+//			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo agregar el vino").build();
+//
+//		} catch (SQLException e) {
+//			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+//					.entity("Error al agregar vino en base de datos\n" + e.getStackTrace()).build();
+//		}
+//	}
+    
+
+    
     @POST
-	@Path("/{usuario_id}/vinos")
+	@Path("/{usuario_id}/vinos/{vino_id}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response addVino(@PathParam("usuario_id") int usuarioId, Vino vino) {
+	public Response addVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId, Vino vino) {
 		try {
 			double puntuacion = vino.getPuntuacion();
 			if(puntuacion < 0 || puntuacion > 10) {
 				return Response.status(Response.Status.BAD_REQUEST).entity("Error: La puntuacion debe estar entre 0 y 10").build();
 			}
-			String sql = "INSERT INTO vino (id_usuario, nombre, bodega, agnada, denominacion, tipo, puntuacion) "
-					+
-					"VALUES (?,?,?,?,?,?,?,?)";
-			PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			ps.setInt(1, usuarioId);
-			ps.setString(2, vino.getNombre());
-			ps.setString(3, vino.getBodega());
-			ps.setInt(4, vino.getAñada());
-			ps.setString(5, vino.getDenominacion());
-			ps.setString(6, vino.getTipo());
-			ps.setDouble(7, puntuacion);
-
-			int affectedRows = ps.executeUpdate();
-
-			// obtener el ID del vino creado
-			// Necesita haber indicado Statement.RETURN_GENERATED_KEYS al ejecutar un
-			// statement.executeUpdate() o al crear un PreparedStatement
-			ResultSet generatedID = ps.getGeneratedKeys();
-			if (generatedID.next()) {
-				vino.setId(generatedID.getInt(1));
-				String location = uriInfo.getAbsolutePath().toString() + "/" + vino.getId();
-				return Response.status(Response.Status.CREATED).entity(vino).header("Location", location)
-						.header("Content-Location", location).build();
+			
+			//SELECCION DE VINO DE LA BBDD
+			String sql = "SELECT * FROM vino WHERE id_vino = ?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, vinoId);
+			ResultSet rs = ps.executeQuery();
+			
+			Vino vinoN = new Vino();
+			while(rs.next()) {
+				vinoN.setId(rs.getInt("id_vino"));
+				vinoN.setNombre(rs.getString("nombre"));
+				vinoN.setBodega(rs.getString("bodega"));
+				vinoN.setAñada(rs.getInt("agnada"));
+				vinoN.setDenominacion(rs.getString("denominacion"));
+				vinoN.setTipo(rs.getString(rs.getString("tipo")));
 			}
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo agregar el vino").build();
-
-		} catch (SQLException e) {
+			//si no existe el vino no se sigue ejecutando
+			String sql2 = "UPDATE vino SET puntuacion = ? WHERE id_vino = ?";
+			PreparedStatement ps2 = conn.prepareStatement(sql2);
+			ps.setDouble(1, vino.getPuntuacion());
+			ps.setInt(2, vinoId);
+			int affectedRows2 = ps2.executeUpdate();
+			if (affectedRows2 > 0) {
+				//ENLACE DE VINO CON USUARIO
+				String sql3 = "INSERT INTO vinos_usuarios (id_usuario, id_vino) VALUES (?,?)";
+				PreparedStatement ps3 = conn.prepareStatement(sql3);
+				ps.setInt(1, usuarioId);
+				ps.setInt(2, vinoId);
+				int affectedRows3 = ps3.executeUpdate();
+				if (affectedRows3 == 1)
+					return Response.status(Response.Status.BAD_REQUEST).entity("Error al agregar el vino con el usuario").build();
+			}else {
+				return Response.status(Response.Status.BAD_REQUEST).entity("No se ha podido modificar la puntuacion").build();
+			}
+			
+			return Response.status(Response.Status.OK).entity("FUNCIONEEE DE CASUALIDAD!!").build();
+		} catch(SQLException e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-					.entity("Error al agregar vino en base de datos\n" + e.getStackTrace()).build();
+					.entity("Error al crear el vino\n" + e.getMessage()).build();
 		}
 	}
-    
 
+    
+    
+    
+    
     //YA FUNCIONA!!!
     @PUT
 	@Path("/{usuario_id}/vinos/{vino_id}")
