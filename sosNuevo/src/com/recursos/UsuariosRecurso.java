@@ -358,22 +358,17 @@ public class UsuariosRecurso {
 						.entity("El vino no se encuentra en la lista del usuario").build();
 			}
 
-			String sql = "UPDATE vino SET nombre = ?, bodega = ?, agnada = ?, denominacion = ?, tipo = ?, tiposUva = ?, puntuacion = ?"
-					+ " WHERE id_vino = ? AND id_usuario = ?";
+			//TODO:REVISAR QUE SOLO SEA LA PUNTUACION LO QUE SE MODIFICA
+			String sql = "UPDATE vino SET puntuacion = ? WHERE id_vino = ? AND id_usuario = ?";
 			PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-			ps.setString(1, vino.getNombre());
-			ps.setString(2, vino.getBodega());
-			ps.setInt(3, vino.getAñada());
-			ps.setString(4, vino.getDenominacion());
-			ps.setString(5, vino.getTipo());
-			ps.setString(6, vino.getTiposUva());
-			ps.setInt(7, vino.getPuntuacion());
-			ps.setInt(8, vinoId);
-			ps.setInt(9, usuarioId);
+			ps.setInt(1, vino.getPuntuacion());
+			ps.setInt(2, vinoId);
+			ps.setInt(3, usuarioId);
+			
 			int affectedRows = ps.executeUpdate();
 
 			if (affectedRows > 0) {
-				return Response.status(Response.Status.OK).entity("Vino actualizado correctamente").build();
+				return Response.status(Response.Status.OK).entity("Puntuacion del vino actualizada correctamente").build();
 			} else {
 				return Response.status(Response.Status.NOT_FOUND).entity("No se encontro el vino").build();
 			}

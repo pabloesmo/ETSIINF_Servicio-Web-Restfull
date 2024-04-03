@@ -24,7 +24,7 @@ CREATE TABLE vino (
     denominacion VARCHAR(40) NOT NULL,
     tipo VARCHAR(25) NOT NULL,
     tiposUva VARCHAR(200) NOT NULL,
-    puntuacion INT NOT NULL,
+    puntuacion INT NOT NULL CHECK (puntuacion >= 0 AND puntuacion <= 10),
     PRIMARY KEY (id_vino),
     FOREIGN KEY(id_usuario) REFERENCES usuario(id)
 );
