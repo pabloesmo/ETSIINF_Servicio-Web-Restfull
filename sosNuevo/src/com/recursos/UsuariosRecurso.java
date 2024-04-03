@@ -9,6 +9,11 @@ import javax.ws.rs.*;
 import org.apache.naming.NamingContext;
 import com.datos.*;
 
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.MediaType;
+
 @Path("/usuarios")
 public class UsuariosRecurso {
 
@@ -134,19 +139,18 @@ public class UsuariosRecurso {
 // 		}
 // 	} 
 
-        
-    //
-    //TODO HAY QUE CAMBIARLO POR JSON O XML 
-    @PUT
+
+    /* 
+	@PUT
     @Path("/{usuario_id}")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response updateUsuario(@PathParam("usuario_id") int usuarioId, @FormParam("nombre") String nombre, @FormParam("fechaNacimiento") String fechaNacimiento, @FormParam("email") String email) {
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateUsuario(@PathParam("usuario_id") int usuarioId, Usuario usuarioNuevo) {
         try {
         	String sql = "UPDATE usuario SET nombre = ?, fechaNacimiento = ?, email = ? WHERE id = ?";
         	PreparedStatement ps = conn.prepareStatement(sql);
-        	ps.setString(1, nombre);
-        	ps.setString(2, fechaNacimiento);
-        	ps.setString(3, email);
+        	ps.setString(1, usuarioNuevo.getNombre());
+        	ps.setString(2, usuarioNuevo.getFechaNacimiento());
+        	ps.setString(3, usuarioNuevo.getEmail());
         	ps.setInt(4, usuarioId);
         	
         	int affectedRows = ps.executeUpdate();
@@ -159,8 +163,42 @@ public class UsuariosRecurso {
         	e.printStackTrace();
         	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al actualizar usuario").build();
         }
-    }
+    }*/
     
+	//TODO HAY QUE PROBAR QUE ESTA FUNCIONA!!
+	@PUT
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("{/usuario_id}")
+	public Response updateUsuario(@PathParam("usuario_id") String usuarioId, Usuario usuarioNuevo) throws ParseException {
+		try {
+			Usuario usuario;
+			int int_id = Integer.parseInt(id);
+			String sql = "SELECT * FROM usuario WHERE id = " + int_id + ";";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				usuario =  usuarioFromRS(rs);
+			} else {
+				return Response.status(Response.Status.NOT_FOUND).entity("Elemento no encontrado").build();
+			}
+			usuario.setNombre(usuarioNuevo.getNombre());
+			usuario.setfechaNacimiento(usuarioNuevo.getfechaNacimiento());
+			usuario.setEmail(usuarioNuevo.getEmail());
+		
+			sql = "UPDATE `vinos`.`usuario` SET "
+					+ "`nombre`='" + usuario.getNombre() 
+					+ "', `fechaNacimiento`='" + usuario.getfechaNacimiento() 
+					+ "', `email`='" + usuario.getEmail() + "';";
+			ps = conn.prepareStatement(sql);
+			int affectedRows = ps.executeUpdate();
+			
+			// Location a partir del URI base (host + root de la aplicación + ruta del servlet)
+			String location = uriInfo.getBaseUri() + "usuarios/" + usuario.getId();
+			return Response.status(Response.Status.OK).entity(usuario).header("Content-Location", location).build();			
+		} catch (SQLException e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo actualizar el usuario\n" + e.getStackTrace()).build();
+		}
+	}
 
     //YA FUNCIONA!!!
     @DELETE
@@ -225,7 +263,13 @@ public class UsuariosRecurso {
         return html.toString();
     }
     
-    	
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+	
 	//YA FUNCIONA!!!
     @GET
     @Path("/{usuario_id}/vinos")
@@ -387,9 +431,54 @@ public class UsuariosRecurso {
 		}
     }
     
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//TODO: FUNCION EN PROCESO...
+	@GET
+	@Path("/{usuario_id}/seguidores")
+	public Response getSeguidores(@PathParam("usuario_id") int usuarioId, @QueryParam("nombre") String nombre, @QueryParam("limit") int limit) {
+		try {
+			String sql = "SELECT * FROM usuario WHERE id IN (SELECT seguidor_id FROM seguimiento WHERE usuario_seguido_id = ?)";
+			if (nombre != null) {
+				sql += " AND nombre LIKE ?";
+			}
+			if (limit > 0) {
+				sql += " LIMIT ?";
+			}
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, usuarioId);
+			int parameterIndex = 2;
+			if (nombre != null) {
+				ps.setString(parameterIndex, "%" + nombre + "%");
+				parameterIndex++;
+			}
+			if (limit > 0) {
+				ps.setInt(parameterIndex, limit);
+			}
+			ResultSet rs = ps.executeQuery();
+			ArrayList<Usuario> seguidores = new ArrayList<>();
+			
+			while(rs.next()) {
+				Usuario seguidor = new Usuario();
+				seguidor.setId(rs.getInt("id"));
+				seguidor.setNombre(rs.getString("nombre"));
+				seguidor.setfechaNacimiento(rs.getString("fechaNacimiento"));
+				seguidor.setEmail(rs.getString("email"));
+				seguidores.add(seguidor);
+			}
+			return Response.status(Response.Status.OK).entity(seguidores).build();
+		} catch (SQLException e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al obtener seguidores\n" + e.getMessage()).build();
+		}
+	}
+	
 	//YA FUNCIONA!!!
     @POST
-	@Path("/{seguidor_id}/seguir/{usuario_seguido_id}")
+	@Path("/{seguidor_id}/seguimiento/{usuario_seguido_id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response seguirUsuario(@PathParam("seguidor_id") int seguidorId,
 			@PathParam("usuario_seguido_id") int usuarioSeguidoId) {
@@ -411,13 +500,28 @@ public class UsuariosRecurso {
 					.entity("Error al añadir el seguidor\n" + e.getMessage()).build();
 		}
 	}
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+	//TODO: FUNCION EN PROCESO...
+	@DELETE
+	@Path("/{seguidor_id}/seguimiento/{usuario_seguido_id}")
+	public Response deleteSeguidor(@PathParam("seguidor_id") int seguidorId, @PathParam("usuario_seguido_id") int usuarioSeguidoId){
+		try {
+			String sql = "DELETE FROM seguimiento WHERE seguidor_id = ? AND usuario_seguido_id = ?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, seguidorId);
+			ps.setInt(2, usuarioSeguidoId);
+			int affectedRows = ps.executeUpdate();
+			
+			if(affectedRows > 0) {
+				return Response.status(Response.Status.OK).entity("Seguidor eliminado correctamente").build();
+			} else {
+				return Response.status(Response.Status.NOT_FOUND).entity("No se encontro el seguidor").build();
+			}
+		} catch (SQLException e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al eliminar el seguidor\n" + e.getMessage()).build();
+		}
+	}
+
+
+
 }
