@@ -3,7 +3,7 @@ package com.datosJakarta;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlAttribute;
 
 public class Link {
 	private URL url;
