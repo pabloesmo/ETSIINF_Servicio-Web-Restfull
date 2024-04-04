@@ -49,11 +49,11 @@ CREATE TABLE tiposUva_Vino (
 
 CREATE TABLE seguir (
     id_seguimiento INT NOT NULL AUTO_INCREMENT UNIQUE,
-    seguidor_id INT NOT NULL,
-    seguido_id INT NOT NULL,
+    id_seguidor INT NOT NULL,
+    id_seguido INT NOT NULL,
     PRIMARY KEY (id_seguimiento),
-    FOREIGN KEY (seguidor_id) REFERENCES usuario(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (seguido_id) REFERENCES usuario(id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (id_seguidor) REFERENCES usuario(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (id_seguido) REFERENCES usuario(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 

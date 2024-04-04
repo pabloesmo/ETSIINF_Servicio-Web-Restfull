@@ -7,17 +7,19 @@ public class Vino {
 	private int añada;
 	private String denominacion;
 	private String tipo;
-	private String[] tiposUva;
-	private int puntuacion;
+	private double puntuacion;
 	
-	public Vino(String nombre, String bodega, int añada, String denominacion, String tipo, String[] tiposUva,int puntuacion) {
+	public Vino(String nombre, String bodega, int añada, String denominacion, String tipo,double puntuacion) {
 		this.nombre = nombre;
 		this.bodega = bodega;
 		this.añada = añada;
 		this.denominacion = denominacion;
 		this.tipo = tipo;
-		this.tiposUva = tiposUva;
 		this.puntuacion = puntuacion;
+	}
+	
+	public Vino() {
+		
 	}
 
 	public int getId() {
@@ -68,24 +70,23 @@ public class Vino {
 		this.tipo = tipo;
 	}
 
-	public String[] getTiposUva() {
-		return tiposUva;
+	public double getPuntuacion() {
+		return puntuacion;
 	}
-
-	public void setTiposUva(String[] tiposUva) {
-		this.tiposUva = tiposUva;
+	
+	public void setPuntuacion(double puntuacion) {
+		this.puntuacion = puntuacion;
 	}
 
 	@Override
 	public String toString() {
 		return "Vino{" +
-				"id=" + id +
-				", nombre='" + nombre + '\'' +
-				", bodega='" + bodega + '\'' +
-				", añada=" + añada +
-				", denominacion='" + denominacion + '\'' +
-				", tipo='" + tipo + '\'' +
-				", tiposUva=" + tiposUva.toString() +
+				"Id=" + id +
+				", Nombre='" + nombre + '\'' +
+				", Bodega='" + bodega + '\'' +
+				", Agnada=" + añada +
+				", Denominacion='" + denominacion + '\'' +
+				", Tipo='" + tipo +
 				'}';
 	}
 }
