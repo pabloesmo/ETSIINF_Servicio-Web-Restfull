@@ -26,7 +26,7 @@ CREATE TABLE vino (
     denominacion VARCHAR(40) NOT NULL,
     tipo VARCHAR(25) NOT NULL,
     puntuacion DOUBLE NOT NULL CHECK (puntuacion >= 0 AND puntuacion <=10),
-    PRIMARY KEY (id_vino)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE vinos_usuarios (
@@ -34,7 +34,7 @@ CREATE TABLE vinos_usuarios (
 	id_vino INT NOT NULL,
 	id_usuario INT NOT NULL,
 	PRIMARY KEY(id_vinos_usuarios),
-	FOREIGN KEY(id_vino) REFERENCES vino(id_vino) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY(id_vino) REFERENCES vino(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY(id_usuario) REFERENCES usuario(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -44,7 +44,7 @@ CREATE TABLE tiposUva_Vino (
 	id_vino INT NOT NULL,
 	PRIMARY KEY(id_tiposUva_Vino),
 	FOREIGN KEY (id_tipoUva) REFERENCES tiposUva(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (id_vino) REFERENCES vino(id_vino) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (id_vino) REFERENCES vino(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE seguir (
