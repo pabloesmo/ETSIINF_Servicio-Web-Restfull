@@ -216,7 +216,7 @@ public class UsuariosRecurso {
       		
       		while(rs.next()) {
       			Vino vino = new Vino();
-      			vino.setId(rs.getInt("id_vino"));
+      			vino.setId(rs.getInt("id"));
       			vino.setNombre(rs.getString("nombre"));
       			vino.setBodega(rs.getString("bodega"));
       			vino.setAñada(rs.getInt("agnada"));
@@ -292,14 +292,14 @@ public class UsuariosRecurso {
 			}
 			
 			//SELECCION DE VINO DE LA BBDD
-			String sql = "SELECT * FROM vino WHERE id_vino = ?";
+			String sql = "SELECT * FROM vino WHERE id = ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, vinoId);
 			ResultSet rs = ps.executeQuery();
 			
 			Vino vinoN = new Vino();
 			while(rs.next()) {
-				vinoN.setId(rs.getInt("id_vino"));
+				vinoN.setId(rs.getInt("id"));
 				vinoN.setNombre(rs.getString("nombre"));
 				vinoN.setBodega(rs.getString("bodega"));
 				vinoN.setAñada(rs.getInt("agnada"));
@@ -307,7 +307,7 @@ public class UsuariosRecurso {
 				vinoN.setTipo(rs.getString(rs.getString("tipo")));
 			}
 			//si no existe el vino no se sigue ejecutando
-			String sql2 = "UPDATE vino SET puntuacion = ? WHERE id_vino = ?";
+			String sql2 = "UPDATE vino SET puntuacion = ? WHERE id = ?";
 			PreparedStatement ps2 = conn.prepareStatement(sql2);
 			ps.setDouble(1, vino.getPuntuacion());
 			ps.setInt(2, vinoId);
@@ -353,7 +353,7 @@ public class UsuariosRecurso {
 				return Response.status(Response.Status.BAD_REQUEST).entity("Error: La puntuacion debe estar entre 0 y 10").build();
 			}
 
-			String sql = "UPDATE vino SET puntuacion = ? WHERE id_vino = ? AND id_usuario = ?";
+			String sql = "UPDATE vino SET puntuacion = ? WHERE id = ? AND id_usuario = ?";
 			PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 			ps.setDouble(1, puntuacion);
 			ps.setInt(2, vinoId);
@@ -378,7 +378,7 @@ public class UsuariosRecurso {
 	public Response deleteVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId) {
 		try {
 
-			String sql = "DELETE FROM vino WHERE id_vino = ? AND id_usuario = ?";
+			String sql = "DELETE FROM vino WHERE id = ? AND id_usuario = ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, vinoId);
 			ps.setInt(2, usuarioId);
@@ -395,7 +395,7 @@ public class UsuariosRecurso {
     
     //FUNCION AUXILIAR PARA BORRADO
     private boolean vinoPerteneceUsuario(int usuarioId, int vinoId) throws SQLException {
-		String sql = "SELECT COUNT(*) AS count FROM vino WHERE id_vino = ? AND id_usuario = ?";
+		String sql = "SELECT COUNT(*) AS count FROM vino WHERE id = ? AND id_usuario = ?";
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setInt(1, vinoId);
 		ps.setInt(2, usuarioId);
@@ -500,7 +500,7 @@ public class UsuariosRecurso {
 	public Response getVinosSeguidor(@PathParam("usuario_id") int usuarioId, @PathParam("seguidor_id") int seguidorId, @QueryParam("bodega") String bodega, @QueryParam("año") int año, @QueryParam("origen") String origen, @QueryParam("tipo") String tipo, @QueryParam("puntuacion") double puntuacion, @QueryParam("fecha_adicion") String fechaAdicion, @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
 	    try {
 	        String sql = "SELECT * FROM vino " +
-	                     "JOIN vinos_usuarios ON vino.id_vino = vinos_usuarios.id_vino " +
+	                     "JOIN vinos_usuarios ON vino.id = vinos_usuarios.id_vino " +
 	                     "JOIN seguir ON vinos_usuarios.id_usuario = seguir.id_seguido " +
 	                     "WHERE seguir.id_seguido = ? AND seguir.id_seguidor = ?";
 
@@ -587,7 +587,7 @@ public class UsuariosRecurso {
 
 	        while (rs.next()) {
 	            Vino vino = new Vino();
-	            vino.setId(rs.getInt("id_vino"));
+	            vino.setId(rs.getInt("id"));
 	            vino.setNombre(rs.getString("nombre"));
 	            vino.setBodega(rs.getString("bodega"));
 	            vino.setAñada(rs.getInt("agnada"));
