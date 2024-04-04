@@ -82,7 +82,7 @@ public class UsuariosRecurso {
     
     //YA FUNCIONA!!
     //TODO HABRIA QUE CAMBIAR EL MODO DE DEVOLUCION PARA DEVOLVER LO QUE ELLOS QUIEREN
-    //ESTA FUNCION ES: lista de usuarios con filtro de nombre (si 2 empiezan por Pe- pues aparecen ambos
+    //ESTA FUNCION ES: lista de usuarios con filtro de nombre (si 2 empiezan por Pe- pues aparecen ambos)
     @GET
     @Path("/{nombre}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -95,7 +95,11 @@ public class UsuariosRecurso {
     		
     		ArrayList<Usuario> usuarios = new ArrayList<>();
     		
-    		while (rs.next()) {
+    		if(!rs.next()) {
+    			return Response.status(Response.Status.NOT_FOUND).entity("Usuario no encontrado").build();
+    		}
+    		
+    		do {
     			Usuario usuario = new Usuario();
     			usuario.setId(rs.getInt("id"));
     			usuario.setNombre(rs.getString("nombre"));
@@ -103,7 +107,7 @@ public class UsuariosRecurso {
     			usuario.setEmail(rs.getString("email")); 
     			
     			usuarios.add(usuario);
-    		}
+    		} while (rs.next());
     		return Response.status(Response.Status.OK).entity(usuarios).build();
     	} catch(SQLException e) {
     		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al obtener usuarios de la base de datos\n" + e.getMessage()).build();
@@ -185,13 +189,8 @@ public class UsuariosRecurso {
         	ps.setInt(1,usuarioId);
         	
         	int affectedRows = ps.executeUpdate();
-        		if(affectedRows > 0) {
-        			// Devolvemos una respuesta con código HTTP 200 OK
-        			return Response.status(Response.Status.OK).build();
-        		} else {
-        			//Devolvemos una respuesta con código HTTP 404 Not Found
-        			return Response.status(Response.Status.NOT_FOUND).build();
-        		}
+        	// Devolvemos una respuesta con código HTTP 200 OK
+        	return Response.status(Response.Status.OK).entity("Se ha borrado correctamente el usuario").build();
         	} catch(SQLException e) {
         	return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al eliminar usuario\n" + e.getStackTrace()).build();
         }
@@ -340,7 +339,7 @@ public class UsuariosRecurso {
     //YA FUNCIONA!!!
     @PUT
 	@Path("/{usuario_id}/vinos/{vino_id}")
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	@Consumes(MediaType.APPLICATION_JSON)
 	public Response updateVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId, Vino vino) {
 		try {
 			// ver si el vino pertenece a la lista o no
@@ -378,25 +377,15 @@ public class UsuariosRecurso {
 	@Path("/{usuario_id}/vinos/{vino_id}")
 	public Response deleteVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId) {
 		try {
-			// ver si el vino pertenece a la lista o no
-			if (!vinoPerteneceUsuario(usuarioId, vinoId)) {
-				return Response.status(Response.Status.NOT_FOUND)
-						.entity("El vino no se encuentra en la lista del usuario").build();
-			}
 
 			String sql = "DELETE FROM vino WHERE id_vino = ? AND id_usuario = ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, vinoId);
 			ps.setInt(2, usuarioId);
 			int affectedRows = ps.executeUpdate();
-
-			if (affectedRows > 0) {
-				// Devolvemos una respuesta con código HTTP 200 OK
-				return Response.status(Response.Status.OK).entity("Vino eliminado existosamente").build();
-			} else {
-				// Devolvemos una respuesta con código HTTP 404 Not Found
-				return Response.status(Response.Status.NOT_FOUND).entity("No se encontro el vino").build();
-			}
+			
+			// Devolvemos una respuesta con código HTTP 200 OK
+			return Response.status(Response.Status.OK).entity("Vino eliminado existosamente").build();
 		} catch (SQLException e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity("Error al eliminar el vino\n" + e.getMessage()).build();
@@ -428,10 +417,10 @@ public class UsuariosRecurso {
 
 	//YA FUNCIONA!!!
 	@GET
-	@Path("/{usuario_id}/seguidores")
+	@Path("/{usuario_id}/seguir")
 	public Response getSeguidores(@PathParam("usuario_id") int usuarioId, @QueryParam("nombre") String nombre, @QueryParam("limit") int limit) {
 		try {
-			String sql = "SELECT * FROM usuario WHERE id IN (SELECT seguidor_id FROM seguimiento WHERE usuario_seguido_id = ?)";
+			String sql = "SELECT * FROM usuario WHERE id IN (SELECT seguidor_id FROM seguir WHERE seguido_id = ?)";
 			if (nombre != null) {
 				sql += " AND nombre LIKE ?";
 			}
@@ -467,12 +456,11 @@ public class UsuariosRecurso {
 	
 	//YA FUNCIONA!!!
     @POST
-	@Path("/{seguidor_id}/seguimiento/{usuario_seguido_id}")
-	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("/{seguidor_id}/seguir/{seguido_id}")
 	public Response seguirUsuario(@PathParam("seguidor_id") int seguidorId,
-			@PathParam("usuario_seguido_id") int usuarioSeguidoId) {
+			@PathParam("seguido_id") int usuarioSeguidoId) {
 		try {
-			String sql = "INSERT INTO seguimiento(seguidor_id, usuario_seguido_id) VALUES (?, ?)";
+			String sql = "INSERT INTO seguir(seguidor_id, seguido_id) VALUES (?, ?)";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, seguidorId);
 			ps.setInt(2, usuarioSeguidoId);
@@ -482,7 +470,7 @@ public class UsuariosRecurso {
 				return Response.status(Response.Status.CREATED).entity("Se ha añadido el seguidor correctamente.")
 						.build();
 			} else {
-				return Response.status(Response.Status.CREATED).entity("No se ha podido añadir el seguidor.").build();
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se ha podido añadir el seguidor.").build();
 			}
 		} catch (SQLException e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -492,24 +480,128 @@ public class UsuariosRecurso {
 
 	//YA FUNCIONA!!!
 	@DELETE
-	@Path("/{seguidor_id}/seguimiento/{usuario_seguido_id}")
-	public Response deleteSeguidor(@PathParam("seguidor_id") int seguidorId, @PathParam("usuario_seguido_id") int usuarioSeguidoId){
+	@Path("/{seguidor_id}/seguir/{seguido_id}")
+	public Response deleteSeguidor(@PathParam("seguidor_id") int seguidorId, @PathParam("seguido_id") int usuarioSeguidoId){
 		try {
-			String sql = "DELETE FROM seguimiento WHERE seguidor_id = ? AND usuario_seguido_id = ?";
+			String sql = "DELETE FROM seguir WHERE seguidor_id = ? AND seguido_id = ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, seguidorId);
 			ps.setInt(2, usuarioSeguidoId);
 			int affectedRows = ps.executeUpdate();
+			return Response.status(Response.Status.OK).entity("Seguidor eliminado correctamente").build();
 			
-			if(affectedRows > 0) {
-				return Response.status(Response.Status.OK).entity("Seguidor eliminado correctamente").build();
-			} else {
-				return Response.status(Response.Status.NOT_FOUND).entity("No se encontro el seguidor").build();
-			}
 		} catch (SQLException e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al eliminar el seguidor\n" + e.getMessage()).build();
 		}
 	}
+	
+	@GET
+	@Path("/{usuario_id}/seguidores/{seguidor_id}/vinos")
+	public Response getVinosSeguidor(@PathParam("usuario_id") int usuarioId, @PathParam("seguidor_id") int seguidorId, @QueryParam("bodega") String bodega, @QueryParam("año") int año, @QueryParam("origen") String origen, @QueryParam("tipo") String tipo, @QueryParam("puntuacion") double puntuacion, @QueryParam("fecha_adicion") String fechaAdicion, @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
+	    try {
+	        String sql = "SELECT * FROM vino " +
+	                     "JOIN vinos_usuarios ON vino.id_vino = vinos_usuarios.id_vino " +
+	                     "JOIN seguir ON vinos_usuarios.id_usuario = seguir.seguido_id " +
+	                     "WHERE seguir.seguido_id = ? AND seguir.seguidor_id = ?";
+
+	        if (bodega != null || año > 0 || origen != null || tipo != null || puntuacion > 0 || fechaAdicion != null) {
+	            sql += " AND ";
+	            boolean addedCondition = false;
+
+	            if (bodega != null) {
+	                sql += "vino.bodega LIKE ? ";
+	                addedCondition = true;
+	            }
+	            if (año > 0) {
+	                if (addedCondition) sql += "AND ";
+	                sql += "vino.agnada = ? ";
+	                addedCondition = true;
+	            }
+	            if (origen != null) {
+	                if (addedCondition) sql += "AND ";
+	                sql += "vino.denominacion LIKE ? ";
+	                addedCondition = true;
+	            }
+	            if (tipo != null) {
+	                if (addedCondition) sql += "AND ";
+	                sql += "vino.tipo LIKE ? ";
+	                addedCondition = true;
+	            }
+	            if (puntuacion > 0) {
+	                if (addedCondition) sql += "AND ";
+	                sql += "vino.puntuacion = ? ";
+	                addedCondition = true;
+	            }
+	            if (fechaAdicion != null) {
+	                if (addedCondition) sql += "AND ";
+	                sql += "vino.fecha_adicion = ? ";
+	            }
+	        }
+
+	        if (limit > 0) {
+	            sql += " LIMIT ?";
+	            if (offset > 0) {
+	                sql += " OFFSET ?";
+	            }
+	        }
+
+	        PreparedStatement ps = conn.prepareStatement(sql);
+	        ps.setInt(1, usuarioId);
+	        ps.setInt(2, seguidorId);
+	        int parameterIndex = 3;
+
+	        if (bodega != null) {
+	            ps.setString(parameterIndex, "%" + bodega + "%");
+	            parameterIndex++;
+	        }
+	        if (año > 0) {
+	            ps.setInt(parameterIndex, año);
+	            parameterIndex++;
+	        }
+	        if (origen != null) {
+	            ps.setString(parameterIndex, "%" + origen + "%");
+	            parameterIndex++;
+	        }
+	        if (tipo != null) {
+	            ps.setString(parameterIndex, "%" + tipo + "%");
+	            parameterIndex++;
+	        }
+	        if (puntuacion > 0) {
+	            ps.setDouble(parameterIndex, puntuacion);
+	            parameterIndex++;
+	        }
+	        if (fechaAdicion != null) {
+	            ps.setString(parameterIndex, fechaAdicion);
+	            parameterIndex++;
+	        }
+	        if (limit > 0) {
+	            ps.setInt(parameterIndex, limit);
+	            parameterIndex++;
+	            if (offset > 0) {
+	                ps.setInt(parameterIndex, offset);
+	            }
+	        }
+
+	        ResultSet rs = ps.executeQuery();
+	        ArrayList<Vino> vinos = new ArrayList<>();
+
+	        while (rs.next()) {
+	            Vino vino = new Vino();
+	            vino.setId(rs.getInt("id_vino"));
+	            vino.setNombre(rs.getString("nombre"));
+	            vino.setBodega(rs.getString("bodega"));
+	            vino.setAñada(rs.getInt("agnada"));
+	            vino.setDenominacion(rs.getString("denominacion"));
+	            vino.setTipo(rs.getString("tipo"));
+	            vino.setPuntuacion(rs.getDouble("puntuacion"));
+	            vinos.add(vino);
+	        }
+	        return Response.status(Response.Status.OK).entity(vinos).build();
+	    } catch (SQLException e) {
+	        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al obtener vinos del seguidor\n" + e.getMessage()).build();
+	    }
+	}
+	
 
 
 

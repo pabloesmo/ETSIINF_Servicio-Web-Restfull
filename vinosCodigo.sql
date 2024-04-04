@@ -2,8 +2,6 @@ DROP SCHEMA IF EXISTS vinos;
 CREATE SCHEMA vinos; 
 use vinos;
 
-
-
 CREATE TABLE usuario (
     id INT NOT NULL AUTO_INCREMENT UNIQUE,
     nombre VARCHAR(50) NOT NULL,
@@ -49,13 +47,13 @@ CREATE TABLE tiposUva_Vino (
     FOREIGN KEY (id_vino) REFERENCES vino(id_vino) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE seguimiento (
+CREATE TABLE seguir (
     id_seguimiento INT NOT NULL AUTO_INCREMENT UNIQUE,
     seguidor_id INT NOT NULL,
-    usuario_seguido_id INT NOT NULL,
+    seguido_id INT NOT NULL,
     PRIMARY KEY (id_seguimiento),
     FOREIGN KEY (seguidor_id) REFERENCES usuario(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (usuario_seguido_id) REFERENCES usuario(id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (seguido_id) REFERENCES usuario(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
@@ -80,9 +78,9 @@ INSERT INTO tiposUva_Vino(id_tipoUva,id_vino) VALUES (2,1);
 INSERT INTO tiposUva_Vino(id_tipoUva,id_vino) VALUES (1,2);
 INSERT INTO tiposUva_Vino(id_tipoUva,id_vino) VALUES (3,2);
 
+INSERT INTO vinos_usuarios(id_vino,id_usuario) VALUES (1,1);
+INSERT INTO vinos_usuarios(id_vino,id_usuario) VALUES (2,1);
 
-
-
-
-
+INSERT INTO vinos_usuarios(id_vino,id_usuario) VALUES (1,2);
+INSERT INTO vinos_usuarios(id_vino,id_usuario) VALUES (2,2);
 
