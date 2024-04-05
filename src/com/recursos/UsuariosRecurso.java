@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.bind.Jsonb;
 import javax.json.JsonReader;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -19,7 +18,6 @@ import javax.sql.DataSource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -61,7 +59,7 @@ public class UsuariosRecurso {
     
     //ESTE ES EL GET TOCHO QUE DEVUELVE LAS URIS DE LOS USUARIOS QUE HAY
  	@GET
- 	@Produces({MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON})
+ 	@Produces(MediaType.APPLICATION_XML)
  	public Response getUsuarios(@QueryParam("offset") @DefaultValue("1") String offset,
  			@QueryParam("count") @DefaultValue("10") String count) {
  		try {
@@ -174,7 +172,7 @@ public class UsuariosRecurso {
         	
         	int affectedRows = ps.executeUpdate();
         	if(affectedRows > 0) {
-        		String location = uriInfo.getBaseUri() + "usuarios/" + usuarioNuevo.getId();
+        		String location = uriInfo.getBaseUri() + "usuarios/" + usuarioId;
     			return Response.status(Response.Status.OK).entity(usuarioNuevo).header("Content-Location", location).build();
         	} else {
         		return Response.status(Response.Status.NOT_FOUND).build();
@@ -370,8 +368,9 @@ public class UsuariosRecurso {
 	}
 	
 	//YA FUNCIONA!!!
+	//Seguido "añade" a seguidor a su lista de seguidores
     @POST
-	@Path("/{seguidor_id}/seguir/{seguido_id}")
+	@Path("/{seguido_id}/seguir/{seguidor_id}")
 	public Response seguirUsuario(@PathParam("seguidor_id") int seguidorId,
 			@PathParam("seguido_id") int usuarioSeguidoId) {
 		try {
@@ -395,7 +394,7 @@ public class UsuariosRecurso {
 
 	//YA FUNCIONA!!!
 	@DELETE
-	@Path("/{seguidor_id}/seguir/{seguido_id}")
+	@Path("/{seguido_id}/no_seguir/{seguidor_id}")
 	public Response deleteSeguidor(@PathParam("seguidor_id") int seguidorId, @PathParam("seguido_id") int usuarioSeguidoId){
 		try {
 			String sql = "DELETE FROM seguir WHERE id_seguidor = ? AND id_seguido = ?";
@@ -410,13 +409,15 @@ public class UsuariosRecurso {
 		}
 	}
 	
+	
+	//VINOS DE SEGUIDORES
 	@GET
 	@Path("/{usuario_id}/seguidores/{seguidor_id}/vinos")
 	public Response getVinosSeguidor(@PathParam("usuario_id") int usuarioId, @PathParam("seguidor_id") int seguidorId, @QueryParam("bodega") String bodega, @QueryParam("año") int año, @QueryParam("origen") String origen, @QueryParam("tipo") String tipo, @QueryParam("fecha_adicion") String fechaAdicion, @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
 	    try {
 	        String sql = "SELECT * FROM vino " +
 	                     "JOIN vinos_usuarios ON vino.id = vinos_usuarios.id_vino " +
-	                     "JOIN seguir ON vinos_usuarios.id_usuario = seguir.id_seguido " +
+	                     "JOIN seguir ON vinos_usuarios.id_usuario = seguir.id_seguidor " +
 	                     "WHERE seguir.id_seguido = ? AND seguir.id_seguidor = ?";
 
 	        if (bodega != null || año > 0 || origen != null || tipo != null || fechaAdicion != null) {
