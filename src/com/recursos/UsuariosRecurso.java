@@ -1,4 +1,5 @@
 package com.recursos;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,6 +9,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.bind.Jsonb;
+import javax.json.JsonReader;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -205,26 +210,27 @@ public class UsuariosRecurso {
     
 	
 	//YA FUNCIONA!!!
-    /*@GET
+    @GET
     @Path("/{usuario_id}/vinos")
     public Response getVinos(@PathParam("usuario_id") int usuarioId) {
     	try {
-            String sql = "SELECT * FROM vinos_usuarios WHERE id_usuario = ?";
+            String sql = "SELECT vino.* FROM vinos_usuarios JOIN vino ON vinos_usuarios.id_vino = vino.id "
+            		+ "WHERE vinos_usuarios.id_usuario = ?";
       		PreparedStatement ps = conn.prepareStatement(sql);
       		ps.setInt(1, usuarioId);
       		ResultSet rs = ps.executeQuery();
       		
+      		ArrayList<Vino> vinos = new ArrayList<>();
       		
       		while(rs.next()) {
-      			Vino vino = new Vino();
-      			vino.setId(rs.getInt("id"));
-      			vino.setNombre(rs.getString("nombre"));
-      			vino.setBodega(rs.getString("bodega"));
-      			vino.setAñada(rs.getInt("agnada"));
-      			vino.setDenominacion(rs.getString("denominacion"));
-      			vino.setTipo(rs.getString("tipo"));
-      			vino.setPuntuacion(rs.getDouble("puntuacion"));
+      			int vinoId = rs.getInt("id");
+      			String nombre = rs.getString("nombre");
+      			String bodega = (rs.getString("bodega"));
+      			int añada = (rs.getInt("agnada"));
+      			String denominacion = (rs.getString("denominacion"));
+      			String tipo = (rs.getString("tipo"));
       			
+      			Vino vino = new Vino(vinoId,nombre,bodega,añada,denominacion,tipo);
       			vinos.add(vino);
       		}
       		return Response.status(Response.Status.OK).entity(vinos).build();
@@ -232,18 +238,21 @@ public class UsuariosRecurso {
     		return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al obtener vinos de la base de datos\n" + e.getMessage()).build();
     	}
     		
-    }*/
+    }
     
-    
+    //YA FUNCIONA!!
     //FUNCION PARA AÑADIR VINOS A LA LISTA DE CADA USUARIO
     //Pensar si la uri debe ser: <<</usuarios/Pepe/vinos>>> (Por nombre) o <<</usuarios/2/vinos>>> (Por id)
-    
-    //YA FUNCIONA!!!
     @POST
 	@Path("/{usuario_id}/vinos/{vino_id}")
 	@Consumes(MediaType.APPLICATION_JSON) //TODO HACERLO CON JSON
-	public Response addVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId, @QueryParam("puntuacion") double puntuacion) {
+	public Response addVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId, String cuerpo) {
 		try {
+			JsonReader jsonReader = Json.createReader(new StringReader(cuerpo));
+			JsonObject jsonObject = jsonReader.readObject();
+			
+			double puntuacion = jsonObject.getJsonNumber("puntuacion").doubleValue();
+			
 			if(puntuacion < 0 || puntuacion > 10) {
 				return Response.status(Response.Status.BAD_REQUEST).entity("Error: La puntuacion debe estar entre 0 y 10").build();
 			}
@@ -256,7 +265,7 @@ public class UsuariosRecurso {
 				if(rowsAffected > 0) {
 					return Response.status(Response.Status.OK).entity("Vino añadido a la lista con su puntuacion").build();
 				} else {
-					return Response.status(Response.Status.BAD_REQUEST).entity("No se pudo insertar el vino con su puntuacion").build();
+					return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo insertar el vino con su puntuacion").build();
 				}	
 			} catch(SQLException e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -264,13 +273,17 @@ public class UsuariosRecurso {
 		}
 	}
 
-    
-    //TODO ARREGLAR ESTO con json
+    //YA FUNCIONA!!!
     @Path("/{usuario_id}/vinos/{vino_id}")
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-	public Response modifPuntVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId, @QueryParam("puntuacion") double puntuacion) {
+	public Response modifPuntVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId, String cuerpo) {
 		try {
+			JsonReader jsonReader = Json.createReader(new StringReader(cuerpo));
+			JsonObject jsonObject = jsonReader.readObject();
+			
+			double puntuacion = jsonObject.getJsonNumber("puntuacion").doubleValue();
+			
 			if(puntuacion < 0 || puntuacion > 10) {
 				return Response.status(Response.Status.BAD_REQUEST).entity("Error: La puntuacion debe estar entre 0 y 10").build();
 			}
@@ -283,7 +296,7 @@ public class UsuariosRecurso {
 				if(rowsAffected > 0) {
 					return Response.status(Response.Status.OK).entity("Puntuacion del vino actualizada").build();
 				} else {
-					return Response.status(Response.Status.NOT_MODIFIED).entity("No se pudo actualizar la puntuacion del vino").build();
+					return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("No se pudo actualizar la puntuacion del vino").build();
 				}	
 			} catch(SQLException e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -291,14 +304,13 @@ public class UsuariosRecurso {
 		}
 	}
     
-    
     //YA FUNCIONA!!!
     @DELETE
 	@Path("/{usuario_id}/vinos/{vino_id}")
 	public Response deleteVino(@PathParam("usuario_id") int usuarioId, @PathParam("vino_id") int vinoId) {
 		try {
 
-			String sql = "DELETE FROM vino WHERE id = ? AND id_usuario = ?";
+			String sql = "DELETE FROM vinos_usuarios WHERE id_vino = ? AND id_usuario = ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, vinoId);
 			ps.setInt(2, usuarioId);
@@ -311,23 +323,6 @@ public class UsuariosRecurso {
 					.entity("Error al eliminar el vino\n" + e.getMessage()).build();
 		}
 	}
-    
-    
-    //FUNCION AUXILIAR PARA BORRADO
-    private boolean vinoPerteneceUsuario(int usuarioId, int vinoId) throws SQLException {
-		String sql = "SELECT COUNT(*) AS count FROM vino WHERE id = ? AND id_usuario = ?";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setInt(1, vinoId);
-		ps.setInt(2, usuarioId);
-		ResultSet rs = ps.executeQuery();
-    	
-		if(rs.next()) {
-			int count = rs.getInt("count");
-			return count > 0;
-		} else {
-			return false;
-		}
-    }
     
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

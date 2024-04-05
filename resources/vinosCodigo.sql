@@ -32,7 +32,7 @@ CREATE TABLE vinos_usuarios (
 	id_vinos_usuarios INT NOT NULL UNIQUE AUTO_INCREMENT,
 	id_vino INT NOT NULL,
 	id_usuario INT NOT NULL,
-	puntuacion DOUBLE NOT NULL
+	puntuacion DOUBLE NOT NULL,
 	PRIMARY KEY(id_vinos_usuarios),
 	FOREIGN KEY(id_vino) REFERENCES vino(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY(id_usuario) REFERENCES usuario(id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -83,4 +83,3 @@ INSERT INTO tiposUva_Vino(id_tipoUva,id_vino) VALUES (3,2);
 
 #INSERT INTO vinos_usuarios(id_vino,id_usuario,puntuacion) VALUES (1,2,0);
 #INSERT INTO vinos_usuarios(id_vino,id_usuario,puntacion) VALUES (2,2,0);
-

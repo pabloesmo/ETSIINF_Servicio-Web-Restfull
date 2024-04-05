@@ -1,4 +1,4 @@
-package com.datosJakarta;
+package com.datos;
 
 public class Vino {
 	private int id;
@@ -7,15 +7,22 @@ public class Vino {
 	private int añada;
 	private String denominacion;
 	private String tipo;
-	private double puntuacion;
 	
-	public Vino(String nombre, String bodega, int añada, String denominacion, String tipo,double puntuacion) {
+	public Vino(String nombre, String bodega, int añada, String denominacion, String tipo) {
 		this.nombre = nombre;
 		this.bodega = bodega;
 		this.añada = añada;
 		this.denominacion = denominacion;
 		this.tipo = tipo;
-		this.puntuacion = puntuacion;
+	}
+	
+	public Vino(int id,String nombre, String bodega, int añada, String denominacion, String tipo) {
+		this.id = id;
+		this.nombre = nombre;
+		this.bodega = bodega;
+		this.añada = añada;
+		this.denominacion = denominacion;
+		this.tipo = tipo;
 	}
 	
 	public Vino() {
@@ -68,14 +75,6 @@ public class Vino {
 
 	public void setTipo(String tipo) {
 		this.tipo = tipo;
-	}
-
-	public double getPuntuacion() {
-		return puntuacion;
-	}
-	
-	public void setPuntuacion(double puntuacion) {
-		this.puntuacion = puntuacion;
 	}
 
 	@Override
