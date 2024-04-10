@@ -2,6 +2,10 @@ DROP SCHEMA IF EXISTS vinos;
 CREATE SCHEMA vinos; 
 use vinos;
 
+#CREATE USER 'vinosUser'@'localhost' IDENTIFIED BY 'vinosPass';
+#GRANT ALL PRIVILEGES ON vinos.* TO 'vinosUser'@'localhost';
+#FLUSH PRIVILEGES;
+
 CREATE TABLE usuario (
     id INT NOT NULL AUTO_INCREMENT UNIQUE,
     nombre VARCHAR(50) NOT NULL,
@@ -21,7 +25,7 @@ CREATE TABLE tiposUva (
 CREATE TABLE vino (
     id INT NOT NULL AUTO_INCREMENT UNIQUE,
     nombre VARCHAR(50) NOT NULL,
-    bodega VARCHAR(25) NOT NULL,
+    bodega VARCHAR(100) NOT NULL,
     agnada INT NOT NULL,
     denominacion VARCHAR(40) NOT NULL,
     tipo VARCHAR(25) NOT NULL,
@@ -57,29 +61,96 @@ CREATE TABLE seguir (
 );
 
 
-INSERT INTO usuario(nombre, fechaNacimiento, email) VALUES ('Pablo','2002-01-19','pablo@example.es');
-INSERT INTO usuario(nombre, fechaNacimiento, email) VALUES ('JD','2002-04-17','jd@example.es');
-INSERT INTO usuario(nombre, fechaNacimiento, email) VALUES ('Antonio','2002-12-22','antonio@example.es');
-
-INSERT INTO vino(nombre,bodega,agnada,denominacion,tipo) VALUES ('Ramon Bilbao','La Bodega Los Charitos',2003,'La Rioja','Tinto');
-INSERT INTO vino(nombre,bodega,agnada,denominacion,tipo) VALUES ('Grillo','La Bodega Los Parrales',2019,'Jerez','Tinto');
-INSERT INTO vino(nombre,bodega,agnada,denominacion,tipo) VALUES ('Pepito','La Bodega Los Menores',1990,'Bilbao','Tinto');
-INSERT INTO vino(nombre,bodega,agnada,denominacion,tipo) VALUES ('Librito','La Bodega Los Autenticos',2005,'Zaragoza','Blanco');
-
-
-INSERT INTO tiposUva(nombre,porcentaje) VALUES ('Chardonnay',55);
-INSERT INTO tiposUva(nombre,porcentaje) VALUES ('Merlot',45);
-INSERT INTO tiposUva(nombre,porcentaje) VALUES ('Cabernet Sauvignon',27);
-INSERT INTO tiposUva(nombre,porcentaje) VALUES ('Uva marron',73);
+INSERT INTO usuario (nombre, fechaNacimiento, email) VALUES
+('Juan Perez', '1990-05-15', 'juan.perez@example.com'),
+('María López', '1985-08-20', 'maria.lopez@example.com'),
+('Pedro García', '1993-02-10', 'pedro.garcia@example.com'),
+('Ana Martínez', '1988-11-25', 'ana.martinez@example.com'),
+('Luis Rodríguez', '1995-04-30', 'luis.rodriguez@example.com'),
+('Elena Sánchez', '1983-09-05', 'elena.sanchez@example.com'),
+('Carlos Gómez', '1991-07-18', 'carlos.gomez@example.com'),
+('Sofía Ruiz', '1997-12-12', 'sofia.ruiz@example.com'),
+('Diego Fernández', '1980-03-08', 'diego.fernandez@example.com'),
+('Laura González', '1987-06-22', 'laura.gonzalez@example.com');
 
 
-INSERT INTO tiposUva_Vino(id_tipoUva,id_vino) VALUES (1,1);
-INSERT INTO tiposUva_Vino(id_tipoUva,id_vino) VALUES (2,1);
-INSERT INTO tiposUva_Vino(id_tipoUva,id_vino) VALUES (1,2);
-INSERT INTO tiposUva_Vino(id_tipoUva,id_vino) VALUES (3,2);
+INSERT INTO vino (nombre, bodega, agnada, denominacion, tipo) VALUES
+('Vega Sicilia Único', 'Vega Sicilia', 2010, 'Ribera del Duero', 'Tinto'),
+('Château Margaux', 'Château Margaux', 2015, 'Margaux', 'Tinto'),
+('Domaine de la Romanée-Conti Romanée-Conti', 'Domaine de la Romanée-Conti', 2012, 'Romanée-Conti', 'Tinto'),
+('Sassicaia', 'Tenuta San Guido', 2016, 'Bolgheri Sassicaia', 'Tinto'),
+('Opus One', 'Opus One Winery', 2014, 'Napa Valley', 'Tinto'),
+('Screaming Eagle Cabernet Sauvignon', 'Screaming Eagle Winery', 2010, 'Oakville', 'Tinto'),
+('Penfolds Grange', 'Penfolds', 2013, 'South Australia', 'Tinto'),
+('La Tâche', 'Domaine de la Romanée-Conti', 2015, 'La Tâche', 'Tinto'),
+('Petrus', 'Château Petrus', 2011, 'Pomerol', 'Tinto'),
+('Krug Clos dAmbonnay', 'Krug', 2000, 'Champagne', 'Champagne'),
+('Château dYquem', 'Château dYquem', 2010, 'Sauternes', 'Blanco'),
+('Dom Pérignon', 'Moët & Chandon', 2008, 'Champagne', 'Champagne'),
+('Veuve Clicquot Ponsardin Brut Rosé', 'Veuve Clicquot Ponsardin', 2012, 'Champagne', 'Champagne'),
+('Leroy Chambertin', 'Domaine Leroy', 2013, 'Chambertin', 'Tinto'),
+('Sine Qua Non Grenache', 'Sine Qua Non', 2014, 'California', 'Tinto');
 
-#INSERT INTO vinos_usuarios(id_vino,id_usuario,puntuacion) VALUES (1,1,7.4);
-#INSERT INTO vinos_usuarios(id_vino,id_usuario,puntuacion) VALUES (2,1,0);
 
-#INSERT INTO vinos_usuarios(id_vino,id_usuario,puntuacion) VALUES (1,2,0);
-#INSERT INTO vinos_usuarios(id_vino,id_usuario,puntacion) VALUES (2,2,0);
+INSERT INTO tiposUva (nombre, porcentaje) VALUES
+('Cabernet Sauvignon', 25.0),
+('Merlot', 20.0),
+('Chardonnay', 15.0),
+('Syrah', 10.0),
+('Sauvignon Blanc', 5.0),
+('Malbec', 10.0),
+('Pinot Noir', 15.0),
+('Tempranillo', 20.0),
+('Riesling', 10.0),
+('Grenache', 15.0);
+
+
+-- Relacionando el vino "Vega Sicilia Único" con sus tipos de uva
+INSERT INTO tiposUva_Vino (id_tipoUva, id_vino) VALUES
+(1, 1), -- Cabernet Sauvignon
+(2, 1); -- Merlot
+
+-- Relacionando el vino "Château Margaux" con sus tipos de uva
+INSERT INTO tiposUva_Vino (id_tipoUva, id_vino) VALUES
+(7, 2), -- Pinot Noir
+(9, 2); -- Riesling
+
+-- Relacionando el vino "Domaine de la Romanée-Conti Romanée-Conti" con sus tipos de uva
+INSERT INTO tiposUva_Vino (id_tipoUva, id_vino) VALUES
+(8, 3), -- Tempranillo
+(10, 3); -- Grenache
+
+-- Relacionando el vino "Sassicaia" con sus tipos de uva
+INSERT INTO tiposUva_Vino (id_tipoUva, id_vino) VALUES
+(1, 4), -- Cabernet Sauvignon
+(3, 4); -- Chardonnay
+
+-- Relacionando el vino "Opus One" con sus tipos de uva
+INSERT INTO tiposUva_Vino (id_tipoUva, id_vino) VALUES
+(1, 5), -- Cabernet Sauvignon
+(4, 5); -- Syrah
+
+-- Relacionando el vino "Screaming Eagle Cabernet Sauvignon" con sus tipos de uva
+INSERT INTO tiposUva_Vino (id_tipoUva, id_vino) VALUES
+(1, 6), -- Cabernet Sauvignon
+(2, 6); -- Merlot
+
+-- Relacionando el vino "Penfolds Grange" con sus tipos de uva
+INSERT INTO tiposUva_Vino (id_tipoUva, id_vino) VALUES
+(6, 7), -- Malbec
+(8, 7); -- Tempranillo
+
+-- Relacionando el vino "La Tâche" con sus tipos de uva
+INSERT INTO tiposUva_Vino (id_tipoUva, id_vino) VALUES
+(7, 8), -- Pinot Noir
+(10, 8); -- Grenache
+
+-- Relacionando el vino "Petrus" con sus tipos de uva
+INSERT INTO tiposUva_Vino (id_tipoUva, id_vino) VALUES
+(8, 9), -- Tempranillo
+(10, 9); -- Grenache
+
+-- Relacionando el vino "Krug Clos d’Ambonnay" con sus tipos de uva
+INSERT INTO tiposUva_Vino (id_tipoUva, id_vino) VALUES
+(9, 10); -- Riesling
+
